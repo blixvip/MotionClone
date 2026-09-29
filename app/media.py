@@ -4,7 +4,6 @@ import math
 import os
 import socket
 import sys
-from pathlib import Path
 from urllib.parse import urlparse, urljoin
 import cv2
 import httpx

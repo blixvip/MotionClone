@@ -4,7 +4,6 @@ This preserves flattened source artwork; it does not infer editable objects.
 """
 import hashlib
 import json
-import math
 import os
 import re
 import shutil

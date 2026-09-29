@@ -1,5 +1,4 @@
 """Persist a reference sequence and feed its trimmed montage into reconstruction."""
-import json
 import threading
 import time
 import uuid

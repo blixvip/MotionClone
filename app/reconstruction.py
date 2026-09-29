@@ -4,7 +4,6 @@ import re
 import shutil
 import time
 import zipfile
-from pathlib import Path
 from fractions import Fraction
 from PIL import Image
 
