@@ -23,6 +23,14 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/platform-Windows-111?style=flat-square" alt="Windows">
+  <img src="https://img.shields.io/badge/python-3.11%2B-111?style=flat-square" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/node-22%2B-111?style=flat-square" alt="Node.js 22+">
+  <img src="https://img.shields.io/badge/AI-your%20ChatGPT%20%2F%20Codex%20login-111?style=flat-square" alt="Uses your ChatGPT / Codex login">
+  <a href="https://github.com/blixvip/MotionClone/stargazers"><img src="https://img.shields.io/github/stars/blixvip/MotionClone?style=flat-square&color=111" alt="GitHub stars"></a>
+</p>
+
+<p align="center">
   <a href="https://motionclone.lol/#examples">
     <img src="docs/images/motionclone-in-action.gif" width="960" alt="Real MotionClone playback: original reference on the left, rebuilt animation on the right">
   </a>
@@ -32,6 +40,13 @@
   <sub>Actual saved reconstruction. Visual differences remain.<br>
   <a href="https://motionclone.lol/#examples">Watch the examples with playback controls</a> · <a href="docs/images/hero-comparison.png">View a still</a></sub>
 </p>
+
+## Why MotionClone
+
+- **Learn from the ads you admire.** Turn any motion-graphics clip into code you can read, tweak, and re-render instead of guessing keyframes by hand.
+- **Editable, not a screen recording.** The output is a HyperFrames project (HTML, assets, fonts, timing), so you can change copy, colors, and pacing, or hand it to a coding agent.
+- **Honest comparison built in.** Original and rebuild play in sync, so you see exactly where they match and where they don't.
+- **No API key.** It uses your own Codex / ChatGPT sign-in; nothing to paste into a config file.
 
 ## A reference is the starting point
 
