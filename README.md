@@ -28,6 +28,7 @@
   <img src="https://img.shields.io/badge/node-22%2B-111?style=flat-square" alt="Node.js 22+">
   <img src="https://img.shields.io/badge/AI-your%20ChatGPT%20%2F%20Codex%20login-111?style=flat-square" alt="Uses your ChatGPT / Codex login">
   <a href="https://github.com/blixvip/MotionClone/stargazers"><img src="https://img.shields.io/github/stars/blixvip/MotionClone?style=flat-square&color=111" alt="GitHub stars"></a>
+  <a href="https://discord.gg/zEB4VjmfSb"><img src="https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 <p align="center">
@@ -156,6 +157,10 @@ No project-wide open-source license has been assigned. Third-party components re
 </details>
 
 For development, run `.venv\Scripts\python.exe -m pytest -q` after setup. See the [development guide](docs/DEVELOPMENT.md) for browser checks.
+
+## Community
+
+💬 [Join the Discord](https://discord.gg/zEB4VjmfSb) for questions, help, feedback, and updates.
 
 ---
 
