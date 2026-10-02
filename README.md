@@ -42,6 +42,20 @@
   <a href="https://motionclone.lol/#examples">Watch the examples with playback controls</a> · <a href="docs/images/hero-comparison.png">View a still</a></sub>
 </p>
 
+<p align="center">
+  <a href="#why-motionclone">Why</a> ·
+  <a href="#a-reference-is-the-starting-point">How it works</a> ·
+  <a href="#run-locally">Run locally</a> ·
+  <a href="#connect-your-ai-account-first">Connect AI</a> ·
+  <a href="#build-a-sequence-in-the-editor">Editor</a> ·
+  <a href="#inside-the-studio">Inside the studio</a> ·
+  <a href="#take-the-result-with-you">Exports</a> ·
+  <a href="#guides--help">Guides</a> ·
+  <a href="#community">Community</a>
+</p>
+
+---
+
 ## Why MotionClone
 
 - **Learn from the ads you admire.** Turn any motion-graphics clip into code you can read, tweak, and re-render instead of guessing keyframes by hand.
