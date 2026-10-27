@@ -185,3 +185,19 @@ For development, run `.venv\Scripts\python.exe -m pytest -q` after setup. See th
 <p align="center">
   <a href="https://buymeacoffee.com/blix"><img src="web/assets/buymeacoffee-yellow.png" width="170" alt="Support MotionClone — buy blix a coffee"></a>
 </p>
+
+<!-- more-from-blixvip:start -->
+## More from blixvip
+
+| Project | What it does |
+| --- | --- |
+| **[GenMotion](https://github.com/blixvip/GenMotion)** | Type an idea, get a finished motion-graphics video. Top Western + Chinese image models, your own API keys. |
+| **[NullMotion](https://github.com/blixvip/NullMotion)** | Play a finished motion-graphics ad in sync with the rough drafts it grew from. Export the breakdown as MP4. |
+| **[html-anime](https://github.com/blixvip/html-anime)** | Turn a scene prompt into a shot sheet, then have a coding agent draw the film in HTML. No video model. |
+| **[easyedit](https://github.com/blixvip/easyedit)** | Type a movie name, get a fan edit: captioned speech cut, then a montage cut to the beat. |
+| **[stick](https://github.com/blixvip/stick)** | Free, open-source stick figure animation software for Windows, Linux and the web. |
+| **[thumbnail-studio](https://github.com/blixvip/thumbnail-studio)** | A minimal Windows workspace for YouTube thumbnails: ChatGPT beside your references. |
+| **[blixtrade](https://github.com/blixvip/blixtrade)** | Open-source core of BLIX, the AI memecoin terminal for Solana, with a public API and MCP server. |
+
+<sub>If one of these helped you, a ⭐ helps other people find it. Follow [@waselyyy](https://x.com/waselyyy) for new drops.</sub>
+<!-- more-from-blixvip:end -->
