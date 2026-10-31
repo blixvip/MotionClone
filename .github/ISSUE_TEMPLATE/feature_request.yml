@@ -1,0 +1,34 @@
+name: ✨ Feature request
+description: Suggest an idea or improvement for MotionClone.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome! Want to talk one through first? Drop it in the
+        [Discord](https://discord.gg/zEB4VjmfSb) or open a
+        [Discussion](https://github.com/blixvip/MotionClone/discussions).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: When I rebuild a reference, I want to…
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: What should MotionClone do? Sketches, screenshots, or example references help a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds you've tried
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd be willing to open a pull request for this.
