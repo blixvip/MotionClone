@@ -36,7 +36,7 @@ Expand **Choose a style**. Pick Studio, Editorial, Signal, Cobalt, Peach, or Mon
 
 ![All six recording styles and the independent format and arrangement controls](images/04-style-picker.png)
 
-Comparison exports support landscape **1920 × 1080**, portrait **1080 × 1920**, and square **1080 × 1080**. Use side-by-side, stacked, or rebuild-spotlight arrangements. **Fullscreen** opens the recording view.
+Comparison exports support landscape **1920 × 1080**, portrait **1080 × 1920**, square **1080 × 1080**, ultrawide **"3840 × 1080"** and feed **1080 x 1350**. Use side-by-side, stacked, or rebuild-spotlight arrangements. **Fullscreen** opens the recording view.
 
 <p align="center">
   <img src="images/portrait-comparison.png" width="380" alt="The actual System Prompts reference and reconstruction in a portrait Signal comparison">
