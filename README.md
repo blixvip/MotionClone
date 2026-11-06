@@ -172,6 +172,12 @@ MotionClone is released under the [MIT License](LICENSE). Third-party components
 
 For development, run `.venv\Scripts\python.exe -m pytest -q` after setup. See the [development guide](docs/DEVELOPMENT.md) for browser checks.
 
+## Contributors
+
+Thank you to everyone who has helped build MotionClone. New here? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick one of the [good first issues](https://github.com/blixvip/MotionClone/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+<a href="https://github.com/blixvip/MotionClone/graphs/contributors"><img src="https://contrib.rocks/image?repo=blixvip/MotionClone" alt="Contributors" /></a>
+
 ## Community
 
 💬 [Join the Discord](https://discord.gg/zEB4VjmfSb) for questions, help, feedback, and updates.
