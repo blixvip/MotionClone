@@ -166,7 +166,7 @@ Projects and media live in `data/` on your computer. Selected reference frames a
 
 Use footage you own or have permission to adapt. Example projects and reference media are not bundled with a fresh clone. Export completion confirms that a file was produced; use the comparison to judge visual similarity.
 
-No project-wide open-source license has been assigned. Third-party components retain their own licenses; see [THIRD_PARTY.md](THIRD_PARTY.md) and [licenses/](licenses/).
+MotionClone is released under the [MIT License](LICENSE). Third-party components retain their own licenses; see [THIRD_PARTY.md](THIRD_PARTY.md) and [licenses/](licenses/).
 
 </details>
 
