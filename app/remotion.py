@@ -44,7 +44,7 @@ def export_project(folder, plan, brief):
 
 def render(folder, plan, brief, cancel, progress, *, preview=False):
     if not (RUNTIME/'node_modules/@remotion/renderer').exists():
-        raise ValueError('Remotion is not installed. Run Start MotionClone again to finish setup.')
+        raise ValueError('Remotion is not installed. Run npm ci --prefix remotion in the MotionClone folder, then try again.')
     public=write_project(folder,plan,brief)
     output=folder/('preview.mp4' if preview else 'output.mp4')
     pending=output.with_name(output.stem+'.pending.mp4')

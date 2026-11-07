@@ -11,7 +11,7 @@ Run commands from the repository root after completing setup.
 | `app/` | FastAPI server, media processing, reconstruction, and exports |
 | `web/` | Local workspace and optional showcase |
 | `hyperframes/` | Locked dependencies for the current renderer |
-| `remotion/` | Optional renderer for legacy projects |
+| `remotion/` | Optional renderer for legacy projects; install it with `npm ci --prefix remotion` |
 | `tests/` | Automated Python tests |
 | `scripts/` | Browser acceptance checks and asset tools |
 | `data/` | Local projects and media; ignored by Git |
