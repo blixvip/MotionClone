@@ -48,7 +48,7 @@ class Workers:
         async with self.lock:
             now = time.monotonic()
             for key, worker in list(self.workers.items()):
-                # A live tab polls; unobserved jobs have a bounded 20-minute grace period.
+                # A live tab polls; unobserved jobs have a bounded 30-minute grace period.
                 if worker['proc'].poll() is not None or now - worker['seen'] > 1800:
                     try:
                         status = await self.client.get(worker['url'] + '/api/status', timeout=3)
