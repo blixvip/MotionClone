@@ -1,8 +1,8 @@
 # Contributing to MotionClone
 
-> 💬 **Before you open a PR, join the [blix open source Discord](https://discord.gg/wJfHQXfEMM).** It's the home for contributors across every blixvip repo: ask questions, run ideas by us, and talk through your PR.
+> 💬 **Before you open a PR, join the [blix open source Discord](https://discord.gg/grokbot).** It's the home for contributors across every blixvip repo: ask questions, run ideas by us, and talk through your PR.
 
-Thanks for helping! Questions and ideas are welcome in the **[Discord](https://discord.gg/wJfHQXfEMM)**, and bugs go in [GitHub issues](https://github.com/blixvip/MotionClone/issues/new/choose).
+Thanks for helping! Questions and ideas are welcome in the **[Discord](https://discord.gg/grokbot)**, and bugs go in [GitHub issues](https://github.com/blixvip/MotionClone/issues/new/choose).
 
 ## Finding something to work on
 
@@ -52,4 +52,4 @@ cd remotion && npm test                   # only if you touched remotion/
 - `app/editor.py`, `app/render.py`, `app/recording_export.py`: sequence assembly, frame drawing, and the Chrome frame-by-frame MP4 export
 - `tests/`: pytest. `scripts/`: Playwright acceptance scripts needing Chrome and a live server on :4319
 
-Made something with it? Show it off in the [Discord](https://discord.gg/wJfHQXfEMM).
+Made something with it? Show it off in the [Discord](https://discord.gg/grokbot).
