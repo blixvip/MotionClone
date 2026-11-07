@@ -10,7 +10,7 @@ body:
         - **FFmpeg and ffprobe** must be on your `PATH`, and **Google Chrome** installed.
         - The **Codex CLI** needs to be signed into a ChatGPT account (`codex login`).
 
-        For questions rather than bugs, the [Discord](https://discord.gg/zEB4VjmfSb) is faster.
+        For questions rather than bugs, the [Discord](https://discord.gg/wJfHQXfEMM) is faster.
   - type: dropdown
     id: area
     attributes:
