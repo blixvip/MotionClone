@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
 from .ai import analyze, auth_status
-from .media import MAX_BYTES, contact_sheets, download, prepare, review_timestamps, reference_frames
+from .media import MAX_BYTES, contact_sheets, download, prepare, review_timestamps, reference_frames, validate_url
 from .models import Brief, Plan, LibraryUpdate
 from .process import Cancelled
 from .render import render
@@ -258,13 +258,12 @@ async def create_job(video:UploadFile|None=File(None),logo:UploadFile|None=File(
                      brand:str=Form(''),instructions:str=Form(''),mode:str=Form('hyperframes'),accent:str=Form('#bcf76a'),
                      keep_audio:bool=Form(True),auto_review:bool=Form(True),sampling:str=Form('standard'),import_only:bool=Form(False)):
     if not video and not url.strip():raise HTTPException(400,'Upload a video or paste a public video link.')
-    if HOSTED:
-        if mode!='hyperframes':raise HTTPException(422,'The online studio supports editable motion reconstruction.')
-        if len(url)>2048:raise HTTPException(422,'That video link is too long.')
-        if not video:
-            from .media import validate_url
-            try:await asyncio.to_thread(validate_url,url.strip())
-            except ValueError as exc:raise HTTPException(422,str(exc)) from None
+    if url and len(url)>2048:raise HTTPException(422,'That video link is too long.')
+    if HOSTED and mode!='hyperframes':
+        raise HTTPException(422,'The online studio supports editable motion reconstruction.')
+    if not video:
+        try:await asyncio.to_thread(validate_url,url.strip())
+        except ValueError as exc:raise HTTPException(422,str(exc)) from None
     try:brief=Brief(brand=brand,instructions=instructions,mode=mode,accent=accent,keep_audio=keep_audio,auto_review=auto_review,sampling=sampling)
     except ValueError:raise HTTPException(422,'Check the brand, instructions and mode.')
     with LOCK:
