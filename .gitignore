@@ -23,3 +23,6 @@ VALIDATION.md
 scripts/measure_intro.py
 scripts/measure_grid.py
 scripts/measure_reference.py
+
+# Generated output and downloads; too large for git.
+outputs/

@@ -33,6 +33,16 @@ def test_invalid_group_parent_rejected():
     with pytest.raises(ValueError,match='group parents'):SceneProject.model_validate(data)
 
 
+def test_scene_background_does_not_collide_with_authored_background_group():
+    value=SceneProject(title='Background',background='#101010',layers=[
+        dict(id='background',kind='group',end=2,frames=[dict(t=0,x=0,y=0,w=320,h=180)]),
+        dict(id='label',parent='background',kind='text',text='Hello',end=2,
+             frames=[dict(t=0,x=10,y=10,w=100,h=30)])])
+    merged=scenes.merge([value],[(0,20)],dict(fps=10,width=320,height=180))
+    assert len({layer.id for layer in merged.layers})==3
+    assert merged.layers[-1].parent=='s0_background'
+
+
 def test_grid_and_rounded_strokes_are_supported_without_external_resources():
     layer=Layer(id='outline',kind='path',path='M0 0L100 100',end=1,style={'backgroundSize':'55px 55px','strokeLinecap':'round','strokeLinejoin':'round'},frames=[dict(t=0,x=0,y=0,w=100,h=100)])
     assert layer.style['strokeLinecap']=='round'
@@ -143,3 +153,80 @@ def test_detailed_scene_has_time_to_finish_without_extending_total_budget(tmp_pa
     scenes.build(tmp_path,dict(fps=10,width=320,height=180),threading.Event(),lambda *a:None)
     assert timeouts==[expected_timeout]
     assert max(timeouts)<scenes.MAX_SECONDS
+
+
+def test_similarity_detects_wrong_colors_with_equal_brightness():
+    red=np.full((32,32,3),(255,0,0),dtype=np.uint8)
+    green=np.full((32,32,3),(0,130,0),dtype=np.uint8)
+    assert np.array_equal(cv2.cvtColor(red,cv2.COLOR_RGB2GRAY),cv2.cvtColor(green,cv2.COLOR_RGB2GRAY))
+    assert scenes.similarity(red,red)==pytest.approx(1)
+    assert scenes.similarity(red,green)<.5, 'A different palette must not pass visual correction as a match.'
+
+
+def test_preview_checks_detected_flash_between_regular_samples(tmp_path):
+    source=tmp_path/'source.mp4';writer=cv2.VideoWriter(str(source),cv2.VideoWriter_fourcc(*'mp4v'),10,(160,90))
+    assert writer.isOpened()
+    for n in range(20):writer.write(np.full((90,160,3),255 if n==3 else 0,dtype=np.uint8))
+    writer.release()
+    (tmp_path/'scene-work').mkdir();(tmp_path/'rebuild').mkdir()
+    (tmp_path/'temporal.json').write_text(json.dumps(dict(fps=10,decoded_frames=20,visual_jump_frames=[3,4],sample_frames=[])))
+    (tmp_path/'rebuild/index.html').write_text('<style>body{margin:0;background:#000}</style><script>window.drawFrame=()=>{};</script>')
+    initial=scenes.preview(tmp_path,[(0,20)],dict(width=160,height=90,fps=10),threading.Event())[0]
+    candidate=scenes.preview(tmp_path,[(0,20)],dict(width=160,height=90,fps=10),threading.Event(),tag='revision',only={0})[0]
+    assert {2,3,4,5}.issubset(initial['frames'])
+    assert initial['frames']==candidate['frames'], 'Revision decisions must compare the exact same moments.'
+    assert initial['minimum']<.1, 'The missing single-frame flash must be measured.'
+
+
+def test_accepted_revision_report_contains_final_measured_preview(tmp_path,monkeypatch):
+    (tmp_path/'source.mp4').write_bytes(b'known reference')
+    (tmp_path/'temporal.json').write_text(json.dumps(dict(fps=10,decoded_frames=30,sample_frames=[])))
+    monkeypatch.setattr(scenes,'reference_sheets',lambda *a:[])
+    monkeypatch.setattr(scenes,'write_project',lambda *a,**kw:None)
+    monkeypatch.setattr(scenes,'request_scene',lambda *a,**kw:SceneRevision(updates=[dict(id='title',text='Better')]) if kw.get('tag') else project())
+    def preview(*a,**kw):
+        improved=bool(kw.get('tag'))
+        return [dict(scene=0,mean=.9 if improved else .7,minimum=.8 if improved else .6,image=str(tmp_path/'pair.jpg'))]
+    monkeypatch.setattr(scenes,'preview',preview)
+    result=scenes.build(tmp_path,dict(fps=10,width=320,height=180),threading.Event(),lambda *a:None)
+    report=json.loads((tmp_path/'analysis-report.json').read_text())
+    assert next(layer.text for layer in result.layers if layer.kind=='text')=='Better'
+    assert report['revisions'][0]['accepted'] is True
+    assert report['previews'][0]['mean']==.9
+    assert report['previews'][0]['minimum']==.8
+
+
+@pytest.mark.parametrize('filename,contents',[
+    ('checkpoint.json','{"key":'),('checkpoint.json','null'),('request.json','{"key":'),
+])
+def test_broken_checkpoint_is_rebuilt_instead_of_blocking_resume(tmp_path,monkeypatch,filename,contents):
+    (tmp_path/'source.mp4').write_bytes(b'known reference')
+    (tmp_path/'temporal.json').write_text(json.dumps(dict(fps=10,decoded_frames=30,sample_frames=[])))
+    part=tmp_path/'scene-work/scene-00';part.mkdir(parents=True)
+    (part/filename).write_text(contents)
+    monkeypatch.setattr(scenes,'reference_sheets',lambda *a:[])
+    monkeypatch.setattr(scenes,'write_project',lambda *a,**kw:None)
+    monkeypatch.setattr(scenes,'preview',lambda *a,**kw:[])
+    monkeypatch.setattr(scenes,'request_scene',lambda *a,**kw:project('Recovered'))
+    result=scenes.build(tmp_path,dict(fps=10,width=320,height=180),threading.Event(),lambda *a:None)
+    assert result.title=='Recovered'
+    assert json.loads((part/'checkpoint.json').read_text())['project']['title']=='Recovered'
+
+
+def test_interrupted_new_request_cannot_resume_response_from_old_instructions(tmp_path,monkeypatch):
+    from app.models import Brief
+    (tmp_path/'source.mp4').write_bytes(b'known reference')
+    (tmp_path/'temporal.json').write_text(json.dumps(dict(fps=10,decoded_frames=30,sample_frames=[])))
+    part=tmp_path/'scene-work/scene-00';part.mkdir(parents=True)
+    (part/'request.json').write_text(json.dumps({'key':'old instructions'}))
+    (part/'repair.response.json').write_text(project('Stale').model_dump_json())
+    monkeypatch.setattr(scenes,'reference_sheets',lambda *a:[])
+    monkeypatch.setattr(scenes,'write_project',lambda *a,**kw:None)
+    monkeypatch.setattr(scenes,'preview',lambda *a,**kw:[])
+    def interrupted(*a,**kw):raise scenes.Cancelled()
+    monkeypatch.setattr(scenes,'request_scene',interrupted)
+    args=(tmp_path,dict(fps=10,width=320,height=180),threading.Event(),lambda *a:None)
+    with pytest.raises(scenes.Cancelled):scenes.build(*args,brief=Brief(instructions='New copy'))
+    monkeypatch.setattr(scenes,'request_scene',lambda *a,**kw:project('New copy'))
+    result=scenes.build(*args,brief=Brief(instructions='New copy'))
+    assert result.title=='New copy'

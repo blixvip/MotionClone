@@ -2,9 +2,9 @@
 
 [Back to the README](../README.md)
 
-For promotional comparisons, open a saved project and select **Compare & export**. **Fullscreen** opens the fullscreen layout with MotionClone, **motionclone.lol**, GitHub **@blixvip**, X **@waselyy**, and the repository address around synchronized videos. Space pauses or plays, R restarts, and Esc returns to the workspace; both videos loop together. **Download MP4** renders the selected canvas directly. A local project URL can include `&view=compare&record=1`.
+For promotional comparisons, open a saved project and select **Compare & export**. **Fullscreen** opens the fullscreen layout with **motionclone.lol**, **@waselyyy**, and large **Before / AI generated** labels above synchronized videos. Space pauses or plays, R restarts, and Esc returns to the workspace; both videos loop together. **Download MP4** renders the selected canvas directly. A local project URL can include `&view=compare&record=1`.
 
-The comparison frame includes GitHub and X marks, developer credits, glass panels, and an original violet WebGL light field behind the header. It renders at up to 25 fps with bounded resolution, pauses offscreen, and becomes static for reduced motion. A CSS material remains when WebGL is unavailable. Run `.venv\Scripts\python.exe scripts/promo_comparison_acceptance.py --project YOUR_PROJECT_ID` to check saved media, recording layouts, playback, and effect fallbacks.
+The comparison keeps the videos prominent, with a single website link and creator handle. The AI result has a contrasting label. There are no slogans, repository links, or animated backgrounds. Run `.venv\Scripts\python.exe scripts/promo_comparison_acceptance.py --project YOUR_PROJECT_ID` to check saved media, recording layouts, and playback.
 
 ### Recording looks and short-form framing
 
@@ -14,14 +14,14 @@ In **Compare & export**, expand **Choose a style** to see the six looks. **Fulls
 
 | Look | Default framing | Treatment |
 |---|---|---|
-| Studio | 16:9, side by side | Violet glass and animated light |
-| Editorial | 1:1, stacked | Cream paper, red rules, serif title |
-| Signal | 9:16, stacked | Lime, dark ink, compact technical type |
+| Studio | 16:9, side by side | Ice blue, dark type, blue result label |
+| Editorial | 1:1, stacked | Cream paper and a rust result label |
+| Signal | 9:16, stacked | Lime and dark ink |
 | Cobalt | 16:9, rebuild spotlight | Blue and white with a smaller reference |
-| Peach | 9:16, rebuild spotlight | Warm poster with a centered masthead |
-| Monochrome | 1:1, side by side | Black and white, square edges |
+| Peach | 9:16, rebuild spotlight | Soft peach and warm brown |
+| Monochrome | 1:1, side by side | Charcoal and white |
 
-Every look retains MotionClone, motionclone.lol, both labeled videos, GitHub @blixvip, X @waselyy, and the repository address. Format and arrangement can be changed independently. The canvases are 1920 x 1080, 1080 x 1920, or 1080 x 1080 and fit the available screen without cropping either video. Vertical canvases leave extra top and bottom space. Download MP4 uses the selected native dimensions regardless of your display size.
+Every look retains motionclone.lol, both labeled videos, and @waselyyy. Format and arrangement can be changed independently. The canvases are 1920 x 1080, 1080 x 1920, or 1080 x 1080 and fit the available screen without cropping either video. Vertical canvases leave extra top and bottom space. Download MP4 uses the selected native dimensions regardless of your display size.
 
 **Copy local view link** saves the look, format, and arrangement in a URL that opens directly into recording view on this computer. Preferences also persist in this browser. Example: `/?project=YOUR_PROJECT_ID&view=compare&record=1&look=signal&format=portrait&layout=stack`.
 

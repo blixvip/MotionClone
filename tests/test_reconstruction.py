@@ -62,3 +62,17 @@ def test_new_pipeline_never_falls_back_to_original_copy(tmp_path,monkeypatch):
     server.pipeline(ident)
     assert job['status']=='error' and 'Independent layer' in job['error']
     assert not (folder/'output.mp4').exists()
+
+
+def test_negative_visual_similarity_reports_differences_without_rejecting_valid_video(tmp_path):
+    import numpy as np
+    from PIL import Image
+    y,x=np.indices((90,160));pattern=(((x//4+y//4)%2)*255).astype(np.uint8)
+    for name,pixels in [('source',pattern),('candidate',255-pattern)]:
+        image=tmp_path/(name+'.png');Image.fromarray(pixels).save(image)
+        run(['ffmpeg','-y','-v','error','-loop','1','-i',str(image),'-r','10','-frames:v','3',
+             '-c:v','libx264','-crf','0','-pix_fmt','yuv420p',str(tmp_path/(name+'.mp4'))])
+    report=rebuild.compare_frames(tmp_path,tmp_path/'candidate.mp4',threading.Event())
+    assert report['actual_frames']==report['compared_frames']==3
+    assert report['ssim_min']<0
+    assert report['visual_check']=='differences' and report['near_perfect'] is False

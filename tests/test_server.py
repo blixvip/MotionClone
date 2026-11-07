@@ -21,6 +21,20 @@ def test_showcase_and_workspace_routes_remain_separate():
     assert 'id="create-form"' in client.get('/?project=aaaaaaaaaaaa').text
 
 
+def test_settings_and_support_are_present_in_local_and_hosted_workspace(monkeypatch):
+    import app.server as server
+    for hosted in (False, True):
+        monkeypatch.setattr(server, 'HOSTED', hosted)
+        response = client.get('/?workspace=1&settings=1')
+        assert response.status_code == 200
+        assert response.text.count('id="settings-dialog"') == 1
+        assert 'id="open-settings"' in response.text
+        assert '<!--ACCOUNT_SETTINGS-->' not in response.text
+        header = response.text.split('</header>', 1)[0]
+        assert 'https://buymeacoffee.com/blix' in header
+        assert 'https://github.com/blixvip/MotionClone' in header
+
+
 def test_mutation_requires_local_token():
     assert client.post('/api/jobs').status_code==403
 

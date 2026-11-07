@@ -1,4 +1,5 @@
-"""Generate MotionClone's original SVG icon and illustration assets."""
+"""Build brand wrappers around the approved logo, plus interface illustrations."""
+import base64
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / 'web' / 'assets'
@@ -48,9 +49,11 @@ ICONS = {
 }
 symbols = ''.join(f'<symbol id="{name}" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">{body}</g></symbol>' for name, body in ICONS.items())
 (ROOT/'icons.svg').write_text(f'<svg xmlns="http://www.w3.org/2000/svg">{symbols}</svg>',encoding='utf-8')
-mark = '<rect x="4" y="3" width="24" height="27" rx="6" fill="none" stroke="{color}" stroke-width="2.5" opacity=".4"/><rect x="12" y="11" width="25" height="27" rx="6" fill="{color}"/><path d="m21 18 10 7-10 7z" fill="{cut}"/>'
+logo = base64.b64encode((ROOT/'motionclone-logo-source.png').read_bytes()).decode('ascii')
+# Keep the uploaded pixels intact. The SVG viewport frames the app tile.
+mark = f'<svg viewBox="128 138 1000 1000" width="42" height="42"><image href="data:image/png;base64,{logo}" width="1280" height="1280"/></svg>'
 for variant,color,cut in [('color','#6953cc','#fff'),('dark','#23252b','#fff'),('light','#fff','#23252b')]:
-    art=mark.format(color=color,cut=cut)
+    art=mark
     (ROOT/f'motionclone-icon-{variant}.svg').write_text(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42">{art}</svg>',encoding='utf-8')
     (ROOT/f'motionclone-wordmark-{variant}.svg').write_text(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 44">{art}<text x="51" y="30" fill="{color if variant != "color" else "#23252b"}" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="650" letter-spacing="-1">MotionClone</text></svg>',encoding='utf-8')
 decorations={

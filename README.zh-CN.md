@@ -23,7 +23,9 @@ MotionClone 使用 Codex 和你的 ChatGPT 账号，将参考视频中的文字�
 
 *这是实际保存的重建结果。左侧是原视频，右侧是 MotionClone 的重建版本。[打开播放器查看](https://motionclone.lol/#examples) · [查看静态图片](docs/images/hero-comparison.png)*
 
-本地应用可免费下载，无需订阅 MotionClone。**ChatGPT/Codex 的费用和用量限制取决于你的账号套餐，与 MotionClone 分开。** 重建结果可能与原视频有差异；小字、不常见的字体、照片和复杂 3D 画面往往需要进一步调整。
+**请连接你自己的 AI 账号。** 生成视频需要你自己的 ChatGPT/Codex 连接。下载本仓库不包含 AI 访问权限、额度或无限次生成；模型权限、费用和用量限制取决于你的账号套餐。登录网站与连接 AI 账号是两个独立步骤。重建结果可能与原视频有差异；小字、不常见的字体、照片和复杂 3D 画面往往需要进一步调整。
+
+在 **Editor** 页面可导入参考视频，选择片段的起止时间，排序并添加创作说明，然后用自己的 AI 账号生成可编辑视频。最多 12 个片段，总时长不超过 120 秒。点击 **Save sequence** 保存草稿，点击 **Generate my video** 开始生成。详见 [Editor 使用说明（英文）](docs/EDITOR.md)。
 
 ## 本地运行
 

@@ -14,13 +14,14 @@ from .models import Strict
 from .process import popen, run
 
 ROOT = Path(__file__).resolve().parents[1]
-FORMATS = {'landscape': (1920, 1080), 'portrait': (1080, 1920), 'square': (1080, 1080)}
+FORMATS = {'landscape': (1920, 1080), 'portrait': (1080, 1920), 'square': (1080, 1080),
+           'ultrawide': (3840, 1080), 'feed': (1080, 1350)}
 
 
 class RecordingOptions(Strict):
     look: Literal['studio', 'paper', 'signal', 'cobalt', 'peach', 'mono'] = 'studio'
-    format: Literal['landscape', 'portrait', 'square'] = 'landscape'
-    layout: Literal['split', 'stack', 'spotlight'] = 'split'
+    format: Literal['landscape', 'portrait', 'square', 'ultrawide', 'feed'] = 'landscape'
+    layout: Literal['split', 'stack', 'spotlight', 'wipe'] = 'split'
 
 
 def digest(path):
@@ -46,11 +47,27 @@ def cached(folder):
         return None
     try:
         report = json.loads(report_path.read_text(encoding='utf-8'))
-        if report.get('verified') and report.get('output_sha256') == digest(output):
+        if not isinstance(report, dict) or report.get('verified') is not True:
+            return None
+        settings = RecordingOptions.model_validate(report.get('settings'))
+        if output.stat().st_size and report.get('output_sha256') == digest(output):
+            report['settings'] = settings.model_dump()
             return report
     except (ValueError, OSError):
         pass
     return None
+
+
+def launch_browser(chromium):
+    from playwright.sync_api import Error
+
+    last = None
+    for channel in ('chrome', 'msedge', None):
+        try:
+            return chromium.launch(**({'channel': channel} if channel else {}))
+        except Error as exc:
+            last = exc
+    raise ValueError('No recording browser could start. Install Chrome or Edge, then retry Save MP4.') from last
 
 
 SEEK = """async t => {
@@ -98,7 +115,7 @@ def render(folder, target, options, port, progress):
     progress('Preparing recording layout', 2)
     started = time.monotonic()
     with sync_playwright() as pw, (target / 'encoder.log').open('wb') as log:
-        browser = pw.chromium.launch(channel='chrome')
+        browser = launch_browser(pw.chromium)
         encoder = None
         try:
             page = browser.new_page(viewport={'width': width, 'height': height}, device_scale_factor=1)
@@ -106,6 +123,7 @@ def render(folder, target, options, port, progress):
             page.wait_for_function('() => document.body.classList.contains("recording-view")')
             page.wait_for_function('() => ["source-video","result-video"].every(id=>document.getElementById(id).readyState>=2)')
             page.evaluate('() => document.fonts.ready')
+            page.wait_for_function('() => [...document.querySelectorAll("#recording-canvas img")].every(image=>image.complete && image.naturalWidth>0)')
             canvas = page.locator('#recording-canvas')
             bounds = canvas.bounding_box()
             if not bounds or abs(bounds['width'] - width) > 1 or abs(bounds['height'] - height) > 1:
@@ -118,7 +136,9 @@ def render(folder, target, options, port, progress):
                     raise TimeoutError('Recording export timed out. Retry the download.')
                 # Mid-frame seeks avoid rounding onto the preceding decoded frame.
                 page.evaluate(SEEK, (frame + .5) / rate)
-                shot = canvas.screenshot(type='png', timeout=30000)
+                # The layout is fixed for the whole capture. Avoid locator's
+                # repeated scrolling/stability checks on every video frame.
+                shot = page.screenshot(type='png', clip=bounds, timeout=30000)
                 encoder.stdin.write(shot)
                 if frame in (0, count // 2, count - 1):
                     (target / f'frame-{frame:06d}.png').write_bytes(shot)
@@ -158,5 +178,7 @@ def render(folder, target, options, port, progress):
                   dimensions=[width, height], duration=duration, audio=bool(audio), audio_bitstream_match=audio_match,
                   output_sha256=digest(pending), seconds=round(time.monotonic() - started, 2))
     pending.replace(target / 'recording.mp4')
-    (target / 'verification.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    verification = target / 'verification.pending.json'
+    verification.write_text(json.dumps(report, indent=2), encoding='utf-8')
+    verification.replace(target / 'verification.json')
     return report

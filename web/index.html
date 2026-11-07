@@ -1,17 +1,20 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="application-name" content="MotionClone"><meta name="description" content="Rebuild a reference video as editable HyperFrames layers with MotionClone."><link rel="icon" type="image/svg+xml" href="/static/assets/motionclone-icon-color.svg?v=final"><link rel="icon" href="/static/favicon.ico" sizes="16x16 32x32 48x48"><title>MotionClone — Rebuild a video</title><link rel="stylesheet" href="/static/style.css?v=ece8b5986e95"><script src="/static/ui.js?v=dda597c25fe7" defer></script><script src="/static/app.js?v=b8aabaf915ed" defer></script><script src="/static/library.js?v=simple-1" defer></script><link rel="stylesheet" href="/static/studio.css?v=998953058582"><link rel="stylesheet" href="/static/live.css?v=9d1691818115"><link rel="stylesheet" href="/static/comparison.css?v=4d23e47266c6"><link rel="stylesheet" href="/static/recording-presets.css?v=2"><script src="/static/recording-presets.js?v=3" defer></script><script src="/static/comparison.js?v=recording-export-1" defer></script><script src="/static/comparison-shader.js?v=recording-export-1" defer></script><script src="/static/recording-download.js?v=1" defer></script><link rel="stylesheet" href="/static/workspace.css?v=1"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="application-name" content="MotionClone"><meta name="description" content="Rebuild a reference video as editable HyperFrames layers with MotionClone."><link rel="icon" type="image/svg+xml" href="/static/assets/motionclone-icon-color.svg?v=logo-20260911"><link rel="icon" href="/static/favicon.ico?v=logo-20260911" sizes="16x16 32x32 48x48"><title>MotionClone — Rebuild a video</title><link rel="stylesheet" href="/static/style.css?v=ece8b5986e95"><script src="/static/ui.js?v=dda597c25fe7" defer></script><script src="/static/app.js?v=b8aabaf915ed" defer></script><script src="/static/library.js?v=simple-1" defer></script><link rel="stylesheet" href="/static/studio.css?v=998953058582"><link rel="stylesheet" href="/static/live.css?v=9d1691818115"><link rel="stylesheet" href="/static/comparison.css?v=4d23e47266c6"><link rel="stylesheet" href="/static/recording-presets.css?v=layouts-20260916"><script src="/static/recording-presets.js?v=layouts-20260916" defer></script><script src="/static/comparison.js?v=layouts-20260916" defer></script><script src="/static/recording-download.js?v=layouts-20260916" defer></script><link rel="stylesheet" href="/static/workspace.css?v=reference-20260913"><link rel="stylesheet" href="/static/account.css?v=settings-1"><script src="/static/account.js?v=settings-1" defer></script></head>
 <body class="is-new">
 <header class="topbar"><div class="header-inner">
-<a class="wordmark" href="/" aria-label="MotionClone home"><img src="/static/assets/motionclone-icon-color.svg" width="34" height="34" alt="">MotionClone</a>
-<nav class="header-nav" aria-label="Main navigation"><button id="new-project" class="text-button active" data-icon="plus" aria-current="page">New video</button><button id="open-library" class="text-button" data-icon="library">Saved videos</button></nav>
+<a class="wordmark" href="/" aria-label="MotionClone home"><img src="/static/assets/motionclone-icon-color.svg?v=logo-20260911" width="34" height="34" alt="">MotionClone</a>
+<nav class="header-nav" aria-label="Main navigation"><button id="new-project" class="text-button active" data-icon="plus" aria-current="page">New video</button><button id="open-library" class="text-button" data-icon="library">Saved videos</button><a class="text-button" href="/editor">Editor</a><a class="text-button" href="http://127.0.0.1:4321/posts">Post Schedule</a><button id="open-settings" class="text-button" data-icon="settings" type="button" aria-haspopup="dialog">Settings</button></nav>
+<div class="header-support"><a class="github-link" href="https://github.com/blixvip/MotionClone" target="_blank" rel="noopener noreferrer" aria-label="Star MotionClone on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.51-1.29-1.24-1.63-1.24-1.63-1.01-.69.08-.68.08-.68 1.12.08 1.7 1.15 1.7 1.15 1 1.7 2.6 1.21 3.24.93.1-.72.39-1.21.71-1.49-2.48-.28-5.08-1.24-5.08-5.53 0-1.22.44-2.22 1.14-3-.11-.28-.49-1.42.11-2.96 0 0 .94-.3 3.05 1.14a10.6 10.6 0 0 1 5.56 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.54.22 2.68.11 2.96.71.78 1.14 1.78 1.14 3 0 4.3-2.61 5.24-5.1 5.52.4.35.76 1.02.76 2.06v3.07c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/></svg><span>Star on GitHub</span><span class="github-star" data-icon="star"></span></a>
+<a class="coffee-link" href="https://buymeacoffee.com/blix" target="_blank" rel="noopener noreferrer"><img src="/static/assets/buymeacoffee-yellow.png" alt="Buy me a coffee" width="170" height="48"></a>
+</div>
 <div class="connection" role="status"><span id="connection-dot" class="dot"></span><span id="connection">Connecting…</span><button id="refresh-auth" class="icon-button" data-icon="refresh" aria-label="Refresh connection"></button></div>
 </div></header>
 <main><span id="page-location" class="sr-only">New video</span>
 <button id="active-project" class="active-project" data-icon="loader" hidden>Return to your active video</button>
 <div id="connection-notice" class="notice" role="status" hidden>Connection lost. Your project is saved. Reconnecting…</div>
 <div id="global-error" class="notice error" role="alert" hidden></div>
-<div id="auth-help" class="notice" hidden>Connect your ChatGPT subscription: run <code>codex login</code> once, then refresh the connection. No API key.</div>
+<div id="auth-help" class="notice" hidden>Connect your own ChatGPT/Codex account to generate videos. Your account's costs and limits apply. <button id="auth-settings" class="text-button" type="button">Open Settings</button></div>
 <div id="library-load-error" class="notice" role="alert" hidden><span data-icon="offline">Saved videos are unavailable. Check the connection and retry.</span><button id="library-retry" class="secondary" data-icon="refresh">Retry loading</button></div><section id="library-view" hidden>
 <div class="heading library-heading"><div><h1>Saved videos<span class="title-period">.</span></h1><p class="lede">Open a video to compare, edit, or download.</p></div><button id="add-reference" data-icon="plus" class="primary">New video</button></div>
 <div class="library-controls">
@@ -30,18 +33,20 @@
 <form id="create-form" novalidate>
 <fieldset id="import-fields">
 <div id="dropzone" class="source-section">
+<div class="reference-heading"><span class="reference-mark" data-icon="video" aria-hidden="true"></span><div><h2>Reference video</h2><p>The motion you want to recreate.</p></div><span class="reference-limit">Up to 2 minutes</span></div>
 <label for="url" class="input-label">Video link</label>
 <div class="import-row"><div class="url-wrap" data-icon="link"><input id="url" name="url" type="url" placeholder="https://x.com/username/status/…" autocomplete="off" aria-describedby="import-hint import-error"></div><button id="create" data-icon="layers" type="submit" class="primary">Rebuild video</button></div>
 <p id="import-error" class="field-error" role="alert" hidden></p>
 <p id="import-hint" class="hint">Public X, YouTube, Vimeo, or direct video links. Up to 120 seconds.</p>
-<div class="upload-row"><img class="upload-art" src="/static/assets/illustration-upload.svg" alt="" width="74" height="56"><span class="upload-or">Or drop a video here</span><label class="upload-button" for="video"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5"/></svg>Upload a video<input id="video" name="video" type="file" accept="video/*"></label><span id="filehint" class="hint">Drag &amp; drop · MP4, MOV, WebM · 250 MB max</span></div>
+<div class="import-divider" aria-hidden="true"><span>or upload a file</span></div>
+<div class="upload-row"><label class="upload-button" for="video"><span class="upload-symbol" data-icon="upload" aria-hidden="true"></span><span class="upload-title">Upload a video</span><span class="upload-or">Choose a file or drag it here</span><input id="video" name="video" type="file" accept="video/*" aria-label="Upload a video" aria-describedby="filehint"></label><span id="filehint" class="hint">MP4, MOV, WebM · 250 MB max</span></div>
 <div id="selected-file" class="selected-file" hidden><span id="filename"></span><button id="remove-video" data-icon="close" type="button" class="text-button" aria-label="Remove selected video">Remove</button></div>
 </div>
 <details id="project-options" class="disclosure"><summary data-icon="settings">Options <span class="summary-hint">Audio settings</span></summary>
 <label class="check" data-icon="audio"><input id="keep-audio" type="checkbox" checked>Keep original audio</label><button id="render-faithful" data-icon="render" class="secondary" type="button" hidden>Render with these settings</button>
 <p class="hint">Scenes are rebuilt, checked and corrected before export. Complex footage and 3D may need further work.</p>
 </details><div hidden><input id="brand" value=""><input id="accent" value="#b9abff"><textarea id="instructions"></textarea><input id="logo" type="file"><span id="logo-label"></span><input type="radio" name="mode" value="hyperframes" checked><input type="radio" name="mode" value="faithful"><input type="radio" name="mode" value="rebuild"><input type="radio" name="mode" value="adapt"><select id="sampling"><option value="standard">Standard</option><option value="detailed">Detailed</option></select><input id="auto-review" type="checkbox"></div>
-</fieldset><p class="privacy"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="8" width="12" height="9" rx="2"/><path d="M6 8V5a4 4 0 0 1 8 0v3"/></svg>Saved locally. Reference frames go to ChatGPT.</p>
+</fieldset><p class="ai-access-note">Bring your own AI account. Generation uses your ChatGPT/Codex allowance; downloading MotionClone does not include AI credits.</p><p class="privacy"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="8" width="12" height="9" rx="2"/><path d="M6 8V5a4 4 0 0 1 8 0v3"/></svg>Saved locally. Reference frames go to ChatGPT.</p>
 </form>
 </aside>
 <div class="stage-column">
@@ -55,12 +60,12 @@
 <div id="empty-stage" class="empty-stage"><img class="state-art" src="/static/assets/illustration-processing.svg" alt="" width="150" height="114"><p>Your video preview will appear here.</p></div>
 <div id="comparison-stage" class="comparison-stage">
   <div id="promo-header" class="promo-header" hidden>
-    <div id="promo-brand" class="promo-brand"><div class="promo-logo-tile"><img src="/static/assets/motionclone-icon-color.svg" width="42" height="42" alt=""></div><div><small class="promo-eyebrow">REFERENCE → REALITY</small><strong>MotionClone<span class="promo-brand-dot">.</span></strong><small>YOUR NEXT FRAME STARTS HERE.</small></div></div>
-    <a id="promo-website" class="promo-website" href="https://motionclone.lol" target="_blank" rel="noopener noreferrer"><span>SEE IT. REBUILD IT. MAKE IT YOURS.</span><strong>motionclone.lol</strong><svg class="promo-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+    <a id="promo-website" class="promo-website" href="https://motionclone.lol" target="_blank" rel="noopener noreferrer">motionclone<span>.lol</span></a>
+    <div id="promo-identities" class="promo-identities" hidden><a href="https://x.com/blixvip" target="_blank" rel="noopener noreferrer">@blixvip</a></div>
   </div>
   <div class="promo-media">
-    <div id="promo-labels" class="promo-labels" hidden><div><i aria-hidden="true">01</i><span>ORIGINAL REFERENCE</span><small>Source footage</small></div><div><i aria-hidden="true">02</i><span id="promo-result-label">REMADE WITH MOTIONCLONE</span><small>Rebuilt from reference</small></div></div>
-    <div id="players" class="players" hidden><span class="promo-inline-label reference-label">ORIGINAL REFERENCE</span><span class="promo-inline-label rebuilt-label">REMADE WITH MOTIONCLONE</span><video id="result-video" aria-label="Rebuilt result" controls playsinline preload="metadata"></video><video id="source-video" aria-label="Original reference" controls playsinline preload="metadata" hidden></video></div>
+    <div id="promo-labels" class="promo-labels" hidden><div><span>Before</span></div><div><span id="promo-result-label">AI generated</span></div></div>
+    <div id="players" class="players" hidden><span class="promo-inline-label reference-label">Before</span><span class="promo-inline-label rebuilt-label">AI generated</span><video id="result-video" aria-label="AI generated result" controls playsinline preload="metadata"></video><video id="source-video" aria-label="Original reference" controls playsinline preload="metadata" hidden></video></div>
   </div>
   <div id="promo-controls" class="promo-controls" hidden>
     <button id="promo-play" type="button" aria-label="Play both videos" data-icon="play">Play</button>
@@ -71,13 +76,9 @@
     <button id="promo-sound" type="button" aria-label="Unmute audio" aria-pressed="false" data-icon="audio"></button>
   </div>
   <p id="promo-error" class="promo-error" role="alert" hidden></p>
-  <div id="promo-identities" class="promo-identities" hidden>
-    <div class="promo-socials"><a href="https://github.com/blixvip" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.51-1.29-1.24-1.63-1.24-1.63-1.01-.69.08-.68.08-.68 1.12.08 1.7 1.15 1.7 1.15 1 1.7 2.6 1.21 3.24.93.1-.72.39-1.21.71-1.49-2.48-.28-5.08-1.24-5.08-5.53 0-1.22.44-2.22 1.14-3-.11-.28-.49-1.42.11-2.96 0 0 .94-.3 3.05 1.14a10.6 10.6 0 0 1 5.56 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.54.22 2.68.11 2.96.71.78 1.14 1.78 1.14 3 0 4.3-2.61 5.24-5.1 5.52.4.35.76 1.02.76 2.06v3.07c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/></svg><span><small>DEVELOPER / GITHUB</small><b>@blixvip</b></span></a><a href="https://x.com/waselyy" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.64 7.584H.47l8.6-9.835L0 1.154h7.594l5.243 6.932 6.064-6.933Zm-1.29 19.49h2.039L6.487 3.24H4.3l13.31 17.403Z"/></svg><span><small>FOLLOW ON X</small><b>@waselyy</b></span></a></div>
-    <a class="promo-repo" href="https://github.com/blixvip/MotionClone" target="_blank" rel="noopener noreferrer"><span class="promo-code-mark" aria-hidden="true">&lt;/&gt;</span><span><small>EXPLORE THE CODE <span aria-hidden="true">↗</span></small><b>github.com/blixvip/MotionClone</b></span></a>
-  </div>
   <button id="promo-exit" class="promo-exit" type="button" aria-label="Exit recording view">Exit · Esc</button>
 </div>
-<p id="promo-hint" class="promo-hint" hidden>Recording view keeps your branding on-screen and hides workspace controls. Space: play / pause · R: restart · Esc: exit. Videos loop together.</p>
+<p id="promo-hint" class="promo-hint" hidden>Fullscreen shortcuts: Space to play / pause · R to restart · Esc to exit.</p>
 <div id="render-pending" class="render-pending" hidden><span class="processing-dot"></span><span>Rendering your video. You can watch the reference while you wait.</span></div>
 <div class="viewer-footer"><span id="project-name">Untitled project</span><span id="mode-label">SOURCE FRAMES · HYPERFRAMES</span></div>
 </section>
@@ -92,8 +93,7 @@
 </div>
 </section>
 <section id="recent-section" aria-labelledby="recent-title"><div class="section-heading"><div><h2 id="recent-title">Recent videos</h2><p class="hint">Pick up where you left off.</p></div><button id="view-all" data-icon="arrow-right" class="text-button">View all</button></div><p id="recent-loading" class="loading" role="status">Loading your videos…</p><div id="recent-grid" class="library-grid" aria-label="Recent videos"></div><div id="recent-empty" class="library-empty" hidden><img class="state-art" src="/static/assets/illustration-empty.svg" alt="" width="130" height="99"><h3>Your first video starts here.</h3><p>Paste a link or upload a file. Your projects will appear here.</p></div></section>
-<footer><span>MotionClone <span class="footer-divider">/</span> Made by blix.</span><a data-icon="external" href="https://github.com/Tejashmakwana/astra-chatgpt-hyperframes" target="_blank" rel="noreferrer">Method & credits</a><div class="footer-support"><a class="github-link" href="https://github.com/blixvip/MotionClone" target="_blank" rel="noopener noreferrer" aria-label="Star MotionClone on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.51-1.29-1.24-1.63-1.24-1.63-1.01-.69.08-.68.08-.68 1.12.08 1.7 1.15 1.7 1.15 1 1.7 2.6 1.21 3.24.93.1-.72.39-1.21.71-1.49-2.48-.28-5.08-1.24-5.08-5.53 0-1.22.44-2.22 1.14-3-.11-.28-.49-1.42.11-2.96 0 0 .94-.3 3.05 1.14a10.6 10.6 0 0 1 5.56 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.54.22 2.68.11 2.96.71.78 1.14 1.78 1.14 3 0 4.3-2.61 5.24-5.1 5.52.4.35.76 1.02.76 2.06v3.07c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/></svg><span>Star on GitHub</span><span class="github-star" data-icon="star"></span></a>
-<a class="coffee-link" href="https://buymeacoffee.com/blix" target="_blank" rel="noopener noreferrer"><img src="/static/assets/buymeacoffee-yellow.png" alt="Buy me a coffee" width="170" height="48"></a>
-</div></footer>
+<footer><span>MotionClone <span class="footer-divider">/</span> Made by blix.</span><a data-icon="external" href="https://github.com/Tejashmakwana/astra-chatgpt-hyperframes" target="_blank" rel="noreferrer">Method & credits</a></footer>
 </main>
+<!--ACCOUNT_SETTINGS-->
 </body></html>

@@ -65,7 +65,8 @@ def compare_frames(folder, candidate, cancel):
     run(['ffmpeg','-y','-v','error','-i',str(source),'-i',str(candidate),'-filter_complex',
         f'[0:v]settb=AVTB,setpts=N/({fps})/TB,format=yuv420p[a];[1:v]settb=AVTB,setpts=N/({fps})/TB,format=yuv420p[b];'
         '[a][b]ssim=stats_file=rebuild-frame-comparison.log:shortest=1','-an','-f','null','-'],cwd=folder,timeout=240,cancel=cancel)
-    scores=[float(x) for x in re.findall(r'All:([\d.]+)',(folder/'rebuild-frame-comparison.log').read_text())]
+    # Anti-correlated frames have valid negative SSIM; count them as differences.
+    scores=[float(x) for x in re.findall(r'All:([+-]?[\d.]+)',(folder/'rebuild-frame-comparison.log').read_text())]
     if len(scores)!=expected:raise ValueError('Not every rebuilt frame could be compared.')
     mean=sum(scores)/len(scores)
     run(['ffmpeg','-v','error','-xerror','-i',str(candidate),'-f','null','-'],timeout=240,cancel=cancel)

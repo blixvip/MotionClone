@@ -5,15 +5,21 @@
   for(const child of [...stage.children])if(!['promo-controls','promo-exit'].includes(child.id))canvas.append(child);
   stage.prepend(canvas);stage.after($('promo-controls'));
   const presets=[
-    {id:'studio',name:'Studio',detail:'Violet glass · widescreen',format:'landscape',layout:'split'},
+    {id:'studio',name:'Studio',detail:'Ice blue · widescreen',format:'landscape',layout:'split'},
     {id:'paper',name:'Editorial',detail:'Cream & ink · square',format:'square',layout:'stack'},
     {id:'signal',name:'Signal',detail:'Acid lime · short form',format:'portrait',layout:'stack'},
     {id:'cobalt',name:'Cobalt',detail:'Electric blue · spotlight',format:'landscape',layout:'spotlight'},
     {id:'peach',name:'Peach',detail:'Warm poster · short form',format:'portrait',layout:'spotlight'},
     {id:'mono',name:'Monochrome',detail:'Black & white · square',format:'square',layout:'split'},
   ];
-  const formats={landscape:[1920,1080],portrait:[1080,1920],square:[1080,1080]};
-  const layouts=['split','stack','spotlight'];
+  const formats={landscape:[1920,1080],portrait:[1080,1920],square:[1080,1080],ultrawide:[3840,1080],feed:[1080,1350]};
+  const layouts=['split','stack','spotlight','wipe'];
+  const compositions=[
+    {id:'wide',name:'Wide duo',detail:'32:9 · Two full videos',format:'ultrawide',layout:'split'},
+    {id:'square',name:'Square duo',detail:'1:1 · Stacked videos',format:'square',layout:'stack'},
+    {id:'reveal',name:'Split reveal',detail:'16:9 · One shared frame',format:'landscape',layout:'wipe'},
+    {id:'inset',name:'Picture in picture',detail:'16:9 · Large AI result',format:'landscape',layout:'spotlight'},
+  ];
   const query=new URLSearchParams(location.search);
   let saved={};try{saved=JSON.parse(localStorage.getItem('motionclone-recording')||'{}')||{};}catch{}
   const hasURL=['look','format','layout'].some(key=>query.has(key));
@@ -24,9 +30,10 @@
   let active=false,recording=false;
   const panel=document.createElement('section');panel.id='recording-options';panel.hidden=true;
   panel.setAttribute('aria-label','Recording view styles');
-  panel.innerHTML=`<details id="recording-style-options"><summary>Choose a style <span id="recording-style-name"></span></summary>
+  panel.innerHTML=`<div class="recording-compositions" role="group" aria-label="Comparison format">${compositions.map(p=>`<button type="button" class="recording-composition" data-composition="${p.id}" aria-pressed="false"><span class="composition-art" aria-hidden="true"><i></i><i></i></span><span><strong>${p.name}</strong><small>${p.detail}</small></span></button>`).join('')}</div>
+    <details id="recording-style-options"><summary>Color theme <span id="recording-style-name"></span></summary>
     <div class="recording-presets" role="group" aria-label="Recording look">${presets.map(p=>`<button type="button" class="recording-preset" data-look="${p.id}" aria-pressed="false"><span class="preset-art" aria-hidden="true"><i></i><i></i><i></i></span><strong>${p.name}</strong><small>${p.detail}</small><span class="preset-check" aria-hidden="true">✓</span></button>`).join('')}</div></details>
-    <div class="recording-settings"><label>Format<select id="recording-format"><option value="landscape">16:9 · Landscape</option><option value="portrait">9:16 · Short form</option><option value="square">1:1 · Square</option></select></label><label>Arrangement<select id="recording-layout"><option value="split">Side by side</option><option value="stack">Stacked comparison</option><option value="spotlight">Rebuild spotlight</option></select></label><div class="recording-link"><button id="copy-recording-link" type="button" class="secondary">Copy local view link</button><span id="recording-link-status" role="status"></span></div></div>
+    <div class="recording-settings"><label>Format<select id="recording-format"><option value="landscape">16:9 · Landscape</option><option value="portrait">9:16 · Short form</option><option value="square">1:1 · Square</option><option value="ultrawide">32:9 · Wide duo</option><option value="feed">4:5 · Feed</option></select></label><label>Arrangement<select id="recording-layout"><option value="split">Side by side</option><option value="stack">Stacked comparison</option><option value="spotlight">Picture in picture</option><option value="wipe">Split reveal</option></select></label><div class="recording-link"><button id="copy-recording-link" type="button" class="secondary">Copy local view link</button><span id="recording-link-status" role="status"></span></div></div>
     <p id="recording-size" class="recording-size"></p><label id="recording-link-fallback" hidden>Copy this link<input id="recording-link-value" readonly></label>`;
   stage.before(panel);
   function state(){return {look:preset.id,format,layout};}
@@ -49,14 +56,23 @@
     stage.style.setProperty('--capture-width',`${width}px`);stage.style.setProperty('--capture-height',`${height}px`);
     $('recording-format').value=format;$('recording-layout').value=layout;
     for(const button of panel.querySelectorAll('[data-look]'))button.setAttribute('aria-pressed',String(button.dataset.look===preset.id));
+    for(const button of panel.querySelectorAll('[data-composition]')){
+      const composition=compositions.find(p=>p.id===button.dataset.composition);
+      button.setAttribute('aria-pressed',String(composition.format===format&&composition.layout===layout));
+    }
     $('recording-style-name').textContent=preset.name;
-    $('recording-size').textContent=`${width} × ${height} · Full video with audio and credits`;
+    const description=layout==='wipe'?'Original on the left, AI result on the right':layout==='spotlight'?'AI result with the original inset':'Two complete frames';
+    $('recording-size').textContent=`${width} × ${height} · ${description} · original audio`;
     $('recording-link-status').textContent='';$('recording-link-fallback').hidden=true;
     try{localStorage.setItem('motionclone-recording',JSON.stringify(state()));}catch{}
     updateURL();fit();
   }
   panel.querySelectorAll('[data-look]').forEach(button=>button.addEventListener('click',()=>{
     preset=presets.find(p=>p.id===button.dataset.look);format=preset.format;layout=preset.layout;apply();
+  }));
+  panel.querySelectorAll('[data-composition]').forEach(button=>button.addEventListener('click',()=>{
+    const composition=compositions.find(p=>p.id===button.dataset.composition);
+    format=composition.format;layout=composition.layout;apply();
   }));
   $('recording-format').addEventListener('change',event=>{format=event.target.value;apply();});
   $('recording-layout').addEventListener('change',event=>{layout=event.target.value;apply();});

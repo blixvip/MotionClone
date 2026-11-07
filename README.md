@@ -23,7 +23,7 @@ Give MotionClone a reference video. It uses Codex and your ChatGPT account to re
 
 *An actual saved reconstruction. Original on the left, MotionClone on the right. [Watch with playback controls](https://motionclone.lol/#examples) · [View a still](docs/images/hero-comparison.png)*
 
-The local app is free to download and has no MotionClone subscription. **ChatGPT/Codex account costs and usage limits are separate.** Reconstruction is approximate: small text, unfamiliar fonts, photographs, and complex 3D can need more work.
+**Bring your own AI account.** Connect your own ChatGPT/Codex account to generate videos. Downloading this repository does **not** include AI access, credits, or unlimited generation. Your account's model access, costs, and usage limits apply. Reconstruction is approximate: small text, unfamiliar fonts, photographs, and complex 3D can need more work.
 
 ## Run locally
 
@@ -51,6 +51,16 @@ codex login
 The launcher installs the locked dependencies and opens **http://127.0.0.1:4319**. First launch needs an internet connection. Next time, run `start.ps1` or double-click **Start MotionClone.vbs**.
 
 No API key is required. MotionClone uses your Codex login. For a different model available to your account, set `FRAMEFORGE_MODEL` before starting the app; the older environment-variable name is kept for compatibility.
+
+## Connect your AI account first
+
+Open **Settings → Connect ChatGPT**, complete the official OpenAI sign-in, and return to MotionClone. Alternatively, run `codex login` before launching. Signing into the hosted website does not connect the AI account automatically. Current generation supports ChatGPT through Codex; other agent providers are not integrated. [Provider access and usage details](https://learn.chatgpt.com/docs/pricing).
+
+## Build a sequence in the Editor
+
+Open **Editor** from the navigation. Upload references or use saved ones, set each segment's in/out points, and add up to 12 segments (120 seconds total). Reorder or preview the sequence, add segment notes and a project brief, and choose landscape, portrait, or square. **Save sequence** stores your draft in your workspace. **Generate my video** uses your connected AI account to rebuild the assembled reference as one editable video. Follow its progress in the studio and download the MP4 or editable project when complete.
+
+Reference imports and sequence preparation do not use AI; generation does. Original audio is retained when selected. See [Editor](docs/EDITOR.md).
 
 ## 1. Add your reference
 

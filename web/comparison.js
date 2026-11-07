@@ -48,7 +48,7 @@
     for(const id of ['promo-header','promo-labels','promo-controls','promo-identities','promo-hint'])$(id).hidden=!next;
     stage.classList.toggle('promo-active',next);
     if(job?.media)stage.style.setProperty('--video-ratio',`${job.media.width}/${job.media.height}`);
-    $('promo-result-label').textContent=['hyperframes','rebuild'].includes(job?.brief?.mode)?'REMADE WITH MOTIONCLONE':'EXPORTED WITH MOTIONCLONE';
+    $('promo-result-label').textContent=['hyperframes','rebuild'].includes(job?.brief?.mode)?'AI generated':'Exported';
     stage.querySelector('.rebuilt-label').textContent=$('promo-result-label').textContent;
     result.controls=!next;
     if(active!==next){pause();source.muted=true;result.muted=true;$('promo-sound').setAttribute('aria-pressed','false');$('promo-sound').setAttribute('aria-label','Unmute audio');}

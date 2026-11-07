@@ -31,6 +31,13 @@ def atomic_json(path,value):
     temporary.write_text(json.dumps(value,indent=2),encoding='utf-8');temporary.replace(path)
 
 
+def saved_json(path):
+    """An incomplete checkpoint is a cache miss, not a permanently broken job."""
+    try:value=json.loads(path.read_text(encoding='utf-8'))
+    except (FileNotFoundError,UnicodeError,json.JSONDecodeError):return {}
+    return value if isinstance(value,dict) else {}
+
+
 def intervals(scan):
     """Cover every frame exactly once; favor observed cuts near the chunk boundary."""
     count=scan['decoded_frames'];fps=scan['fps']
@@ -88,7 +95,8 @@ def merge(scenes,ranges,meta):
     layers=[];notes=[]
     for i,(value,(first,last)) in enumerate(zip(scenes,ranges)):
         start=first/meta['fps'];end=last/meta['fps'];prefix=f's{i}_'
-        layers.append(dict(id=prefix+'background',kind='rect',start=start,end=end,
+        # Authored IDs start with a letter, so this namespace cannot collide.
+        layers.append(dict(id=prefix+'__background',kind='rect',start=start,end=end,
             style={'background':value.background},frames=[dict(t=start,x=0,y=0,w=meta['width'],h=meta['height'])]))
         surviving=set()
         for item in value.layers:
@@ -102,7 +110,8 @@ def merge(scenes,ranges,meta):
 
 
 def similarity(a,b):
-    a=cv2.cvtColor(a,cv2.COLOR_RGB2GRAY).astype(np.float32);b=cv2.cvtColor(b,cv2.COLOR_RGB2GRAY).astype(np.float32)
+    # Measure each RGB channel: grayscale can give a perfect score to the wrong palette.
+    a=a.astype(np.float32);b=b.astype(np.float32)
     u=cv2.GaussianBlur(a,(11,11),1.5);v=cv2.GaussianBlur(b,(11,11),1.5)
     aa=cv2.GaussianBlur(a*a,(11,11),1.5)-u*u;bb=cv2.GaussianBlur(b*b,(11,11),1.5)-v*v
     ab=cv2.GaussianBlur(a*b,(11,11),1.5)-u*v
@@ -112,6 +121,7 @@ def similarity(a,b):
 def preview(folder,ranges,meta,cancel,*,tag='preview',only=None):
     from playwright.sync_api import sync_playwright
     result=[];cap=cv2.VideoCapture(str(folder/'source.mp4'));out=folder/'scene-work'
+    scan=saved_json(folder/'temporal.json')
     try:
         with sync_playwright() as pw:
             browser=pw.chromium.launch(channel='chrome')
@@ -122,7 +132,9 @@ def preview(folder,ranges,meta,cancel,*,tag='preview',only=None):
                 page.evaluate('document.fonts.ready');page.evaluate('document.fonts.load("40px Agbalumo")')
                 for i,(first,last) in enumerate(ranges):
                     if only is not None and i not in only:continue
-                    scores=[];pairs=[];references=[];rebuilt=[];indices=sorted({first,last-1,*[round(first+(last-first-1)*f) for f in [.25,.5,.75]]})
+                    scores=[];pairs=[];references=[];rebuilt=[]
+                    # Use identical observed moments for baseline and revisions, including brief effects.
+                    indices=sample_indices(first,last,scan,limit=16 if scan.get('budget',192)>192 else 12)
                     for n in indices:
                         if cancel.is_set():raise Cancelled()
                         page.evaluate('(t)=>drawFrame(t)',n/meta['fps'])
@@ -162,18 +174,26 @@ def build(folder,meta,cancel,progress,*,brief=None):
     def one(i,bounds):
         first,last=bounds;part=work/f'scene-{i:02d}';part.mkdir(exist_ok=True);cache=part/'checkpoint.json'
         key=f'{signature}:{first}:{last}'
-        if cache.exists():
-            data=json.loads(cache.read_text(encoding='utf-8'))
-            if data.get('key')==key:return i,SceneProject.model_validate(data['project']),True
+        if flag.is_set():raise Cancelled()
+        data=saved_json(cache)
+        if data.get('key')==key:
+            try:
+                value=SceneProject.model_validate(data.get('project'));merge([value],[bounds],meta)
+                return i,value,True
+            except ValueError:pass
         request_meta=part/'request.json'
-        if request_meta.exists() and json.loads(request_meta.read_text()).get('key')==key:
-            for name in ['repair.response.json','analysis.response.json']:
+        response_names=['repair.response.json','analysis.response.json']
+        if saved_json(request_meta).get('key')==key:
+            for name in response_names:
                 response=part/name
                 if response.exists():
                     try:
                         value=SceneProject.model_validate_json(response.read_text(encoding='utf-8'));merge([value],[bounds],meta)
                         atomic_json(cache,dict(key=key,project=value.model_dump()));return i,value,True
                     except ValueError:pass
+        # Clear old responses before assigning a new request key. If interrupted,
+        # resumption must never adopt a repair made for a different brief/source.
+        for name in response_names:(part/name).unlink(missing_ok=True)
         atomic_json(request_meta,dict(key=key))
         images=reference_sheets(folder/'source.mp4',part,sample_indices(first,last,scan),meta['fps'],flag)
         context=f'Rebuild ONLY {first/meta["fps"]:.6f} <= t < {last/meta["fps"]:.6f} seconds. All times are ABSOLUTE, not relative to this scene. Target at most40 carefully drawn layers and compact JSON under16000 characters. Preserve exact wording and observed timing. Reuse parent groups and multiline text blocks. Neighbouring scenes are handled separately. Every source frame was scanned; attached frames include regular samples and detected motion changes. Produce the complete result promptly; do not deliberate about unrelated portions of the video.'
@@ -201,7 +221,7 @@ def build(folder,meta,cancel,progress,*,brief=None):
             raise
     value=merge(scenes,ranges,meta);write_project(folder,meta,value,cancel=cancel)
     progress('Checking scene previews against the reference',52)
-    before=preview(folder,ranges,meta,cancel);revisions=[]
+    before=preview(folder,ranges,meta,cancel);revisions=[];final_previews={item['scene']:item for item in before}
     # A bounded correction pass. Keep the earlier version whenever a revision regresses.
     for item in sorted(before,key=lambda x:x['mean'])[:2]:
         if item['mean']>=.96 or deadline-time.monotonic()<35:continue
@@ -219,6 +239,7 @@ def build(folder,meta,cancel,progress,*,brief=None):
             revisions.append(dict(scene=i,accepted=accepted,before=item['mean'],after=after['mean']))
             if accepted:
                 value=candidate;cache=part/'checkpoint.json';saved=json.loads(cache.read_text());saved['project']=fixed.model_dump();atomic_json(cache,saved)
+                final_previews[i]=after
             else:scenes[i]=old
         except Cancelled:
             scenes[i]=old
@@ -229,7 +250,8 @@ def build(folder,meta,cancel,progress,*,brief=None):
         finally:write_project(folder,meta,merge(scenes,ranges,meta),cancel=cancel)
     value=merge(scenes,ranges,meta)
     report=dict(version=VERSION,scenes=len(scenes),resumed_scenes=resumed,decoded_frames=scan['decoded_frames'],
-        elapsed_seconds=round(time.monotonic()-started,2),previews=before,revisions=revisions,notes=value.notes)
+        elapsed_seconds=round(time.monotonic()-started,2),previews=list(final_previews.values()),
+        initial_previews=before,preview_metric='ssim_rgb',revisions=revisions,notes=value.notes)
     atomic_json(folder/'analysis-report.json',report)
     progress('Scene review finished; rendering the final video',60)
     return value

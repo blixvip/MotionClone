@@ -19,10 +19,14 @@ from .media import MAX_BYTES, contact_sheets, download, prepare, review_timestam
 from .models import Brief, Plan, LibraryUpdate
 from .process import Cancelled
 from .render import render
+from .connection import Connection
 
 ROOT=Path(__file__).resolve().parents[1]
-DATA=ROOT/'data'; DATA.mkdir(exist_ok=True)
-TOKEN=secrets.token_urlsafe(32)
+HOSTED=os.environ.get('FRAMEFORGE_HOSTED')=='1'
+DATA=Path(os.environ.get('FRAMEFORGE_DATA',str(ROOT/'data'))).resolve(); DATA.mkdir(parents=True,exist_ok=True)
+TOKEN=os.environ.get('FRAMEFORGE_TOKEN') or secrets.token_urlsafe(32)
+if HOSTED and (not os.environ.get('CODEX_HOME') or DATA==ROOT/'data'):
+    raise RuntimeError('Hosted workers require isolated project and account directories.')
 PORT=int(os.environ.get('FRAMEFORGE_PORT','4319'))
 POOL=ThreadPoolExecutor(max_workers=1)
 LOCK=threading.RLock()
@@ -30,6 +34,10 @@ JOBS={}
 ACTIVE={'id':None}
 AUTH={'ok':False,'checked':0.0}
 app=FastAPI(title='MotionClone Local',docs_url=None,redoc_url=None)
+CONNECTION=Connection()
+if HOSTED:
+    if (Path(os.environ['CODEX_HOME'])/'auth.json').is_file():
+        CONNECTION.client()
 
 
 def persist(job):
@@ -86,8 +94,14 @@ async def local_boundary(request: Request, call_next):
         origin=request.headers.get('origin')
         if origin and origin not in {f'http://127.0.0.1:{PORT}',f'http://localhost:{PORT}'}:
             return JSONResponse({'detail':'Cross-origin requests are blocked.'},status_code=403)
-        if int(request.headers.get('content-length','0'))>MAX_BYTES+12*1024*1024:
+        try:length=int(request.headers.get('content-length','0'))
+        except ValueError:return JSONResponse({'detail':'Invalid request size.'},status_code=400)
+        if length>MAX_BYTES+12*1024*1024:
             return JSONResponse({'detail':'Upload exceeds 250 MB.'},status_code=413)
+        if HOSTED and request.url.path.startswith('/api/jobs') and request.url.path.rsplit('/',1)[-1] in ('jobs','retry','render'):
+            try:connected=await asyncio.to_thread(auth_status)
+            except Exception:connected=False
+            if not connected:return JSONResponse({'detail':'Connect your own ChatGPT account before rebuilding a video.'},status_code=401)
     response=await call_next(request)
     response.headers.update({'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
         'Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'"})
@@ -96,8 +110,18 @@ async def local_boundary(request: Request, call_next):
 
 @app.get('/')
 def index(request: Request):
-    if 'workspace' in request.query_params or 'project' in request.query_params:
-        return FileResponse(ROOT/'web/index.html')
+    page=(ROOT/'web/index.html').read_text(encoding='utf-8')
+    page=page.replace('<!--ACCOUNT_SETTINGS-->',(ROOT/'web/account.html').read_text(encoding='utf-8'))
+    if HOSTED:
+        page=page.replace('<body ', '<body data-hosted="true" ',1)
+        page=page.replace('href="/"','href="/studio"')
+        page=page.replace('Stored on this computer','Private to your account').replace('Saved on this computer','Saved to your account')
+        page=page.replace('Projects are stored locally.','Projects are stored privately.')
+        page=page.replace('Saved locally.','Saved privately.').replace('Vimeo, or direct video links.','or Vimeo video links.')
+        page=page.replace('250 MB','25 MB')
+        return HTMLResponse(page)
+    if 'workspace' in request.query_params or 'project' in request.query_params or 'settings' in request.query_params:
+        return HTMLResponse(page)
     page=(ROOT/'web/showcase.html').read_text(encoding='utf-8')
     return HTMLResponse(page.replace('href="./','href="/static/').replace('src="./','src="/static/'))
 
@@ -107,9 +131,38 @@ def status():
     if time.monotonic()-AUTH['checked']>20:
         AUTH.update(ok=auth_status(),checked=time.monotonic())
     return {'chatgpt':AUTH['ok'],'ffmpeg':bool(shutil.which('ffmpeg') and shutil.which('ffprobe')),
-            'token':TOKEN,'active':ACTIVE['id'],'version':'2.0.0',
+            'token':TOKEN,'active':ACTIVE['id'],'version':'2.0.0','account_connection':True,
             'remotion':(ROOT/'remotion/node_modules/@remotion/renderer').exists(),
             'hyperframes':(ROOT/'hyperframes/node_modules/hyperframes/bin/hyperframes.mjs').exists()}
+
+
+@app.get('/api/account')
+def account_state():
+    try:
+        result=CONNECTION.state(initialize=True)
+        AUTH.update(ok=result['status']=='connected',checked=time.monotonic())
+        return result
+    except ValueError as exc:raise HTTPException(503,str(exc)) from None
+
+
+@app.post('/api/account/connect')
+def account_connect():
+    with LOCK:
+        if ACTIVE['id']:raise HTTPException(409,'Wait for your video to finish before changing accounts.')
+        try:return CONNECTION.start()
+        except ValueError as exc:raise HTTPException(503,str(exc)) from None
+
+
+@app.post('/api/account/disconnect')
+def account_disconnect():
+    with LOCK:
+        if ACTIVE['id']:raise HTTPException(409,'Wait for your video to finish before disconnecting.')
+        try:
+            CONNECTION.state(initialize=True)
+            result=CONNECTION.disconnect()
+            AUTH.update(ok=False,checked=0.0)
+            return result
+        except ValueError as exc:raise HTTPException(503,str(exc)) from None
 
 
 @app.get('/api/jobs')
@@ -203,8 +256,15 @@ async def save_upload(upload, dest, limit):
 @app.post('/api/jobs')
 async def create_job(video:UploadFile|None=File(None),logo:UploadFile|None=File(None),url:str=Form(''),
                      brand:str=Form(''),instructions:str=Form(''),mode:str=Form('hyperframes'),accent:str=Form('#bcf76a'),
-                     keep_audio:bool=Form(True),auto_review:bool=Form(True),sampling:str=Form('standard')):
+                     keep_audio:bool=Form(True),auto_review:bool=Form(True),sampling:str=Form('standard'),import_only:bool=Form(False)):
     if not video and not url.strip():raise HTTPException(400,'Upload a video or paste a public video link.')
+    if HOSTED:
+        if mode!='hyperframes':raise HTTPException(422,'The online studio supports editable motion reconstruction.')
+        if len(url)>2048:raise HTTPException(422,'That video link is too long.')
+        if not video:
+            from .media import validate_url
+            try:await asyncio.to_thread(validate_url,url.strip())
+            except ValueError as exc:raise HTTPException(422,str(exc)) from None
     try:brief=Brief(brand=brand,instructions=instructions,mode=mode,accent=accent,keep_audio=keep_audio,auto_review=auto_review,sampling=sampling)
     except ValueError:raise HTTPException(422,'Check the brand, instructions and mode.')
     with LOCK:
@@ -223,7 +283,7 @@ async def create_job(video:UploadFile|None=File(None),logo:UploadFile|None=File(
             (folder/'logo-upload.bin').unlink(missing_ok=True)
         job={'id':id,'created':time.time(),'name':brand.strip() or (video.filename if video else 'Video reference'),
              'status':'queued','stage':'Waiting to start','progress':0,'brief':brief.model_dump(),
-             'url':url.strip() if not video else '', 'events':[],'error':None,'cancel':threading.Event()}
+             'url':url.strip() if not video else '', 'reference_only':import_only, 'events':[],'error':None,'cancel':threading.Event()}
         with LOCK:JOBS[id]=job
         persist(job);job['future']=POOL.submit(pipeline,id)
         return public(job)
@@ -245,6 +305,16 @@ def pipeline(id, render_only=False):
             if changed:job['events'].append({'time':time.time(),'message':stage})
         persist(job)
     try:
+        if job.get('editor') and not (folder/'source.mp4').exists():
+            from .editor import Edit, assemble
+            assemble(Edit.model_validate(job['editor']),DATA,folder,cancel,progress)
+        if job.get('reference_only'):
+            from .media import thumbnail
+            if not (folder/'input.bin').exists():download(job['url'],folder/'input.bin',cancel,progress)
+            meta,_=prepare(folder/'input.bin',folder,cancel,progress,rebuild=True)
+            thumbnail(folder/'source.mp4',folder/'thumbnail.jpg')
+            with LOCK:job.update(media=meta,status='draft',stage='Reference ready in the Editor',progress=100,error=None)
+            return
         if brief.mode=='hyperframes':
             from .reconstruction import render as render_rebuilt
             from .rebuild_author import author
@@ -350,6 +420,7 @@ def retry(id:str, brief:Brief):
     with LOCK:
         if ACTIVE['id']:raise HTTPException(409,'Another video is processing.')
         job=get_job(id);ACTIVE['id']=id
+        job.pop('reference_only',None)
         resume_render=(job['status'] in ('error','cancelled','interrupted') and job.get('checkpoint')=='render'
                        and Brief.model_validate(job['brief'])==brief and (DATA/id/'plan.json').exists())
         job.update(brief=brief.model_dump(),error=None,status='queued',stage='Starting saved project',progress=0,started=time.time(),cancel=threading.Event())
@@ -418,3 +489,10 @@ from .recording_routes import install as install_recording_exports
 install_recording_exports(app, DATA, get_job, PORT)
 
 app.mount('/static',StaticFiles(directory=ROOT/'web'),name='static')
+
+from .editor import install as install_editor
+import sys
+install_editor(app, sys.modules[__name__])
+
+from .posts import install as install_posts
+install_posts(app, sys.modules[__name__])

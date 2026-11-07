@@ -1,6 +1,6 @@
 const $=id=>document.getElementById(id);
 let token='',current=null,view='result',editing=false,lastPlan='',polling=false,ready=false,submitting=false;
-async function api(path,options={}){const r=await fetch(path,{...options,headers:{'X-Frameforge-Token':token,...options.headers}});if(!r.ok){let d;try{d=await r.json()}catch{d={detail:r.statusText}}throw new Error(typeof d.detail==='string'?d.detail:'Check the project settings and try again.')}return r.json()}
+async function api(path,options={}){const r=await fetch(path,{...options,headers:{'X-Frameforge-Token':token,...options.headers}});if(!r.ok){let d;try{d=await r.json()}catch{d={detail:r.statusText}}const error=new Error(typeof d.detail==='string'?d.detail:'Check the project settings and try again.');error.status=r.status;throw error;}return r.json()}
 function error(message){$('global-error').textContent=message;$('global-error').hidden=!message}
 function brief(){return {brand:'',instructions:'',mode:'hyperframes',accent:'#b9abff',keep_audio:$('keep-audio').checked,auto_review:false}}
 function fillBrief(b){$('brand').value=b.brand;$('instructions').value=b.instructions;$('accent').value=b.accent;$('keep-audio').checked=b.keep_audio;$('auto-review').checked=b.auto_review;document.querySelector(`[name=mode][value=${b.mode}]`).checked=true}
@@ -11,6 +11,7 @@ async function status(){
     $('connection-dot').classList.toggle('connected',ready&&!!s.chatgpt);
     $('connection').title=ready?(s.chatgpt?'Renderer and ChatGPT are ready':'Renderer ready; connect ChatGPT for new rebuilds'):'Check the local renderer setup';
     $('auth-help').hidden=!!s.chatgpt;$('connection-notice').hidden=true;
+    window.onAccountStatus?.(s);
     if(!s.ffmpeg)error('FFmpeg is missing. Install FFmpeg and restart the app.');
     return s;
   }catch(e){$('connection').textContent='Disconnected';$('connection-dot').classList.remove('connected');$('connection-notice').hidden=false;return null;}
@@ -24,7 +25,7 @@ function fileChanged() {
   const file=$('video').files[0];
   $('filename').textContent=file?file.name:'';
   $('selected-file').hidden=!file;
-  $('filehint').textContent=file?`${(file.size/1048576).toFixed(1)} MB selected`:'Drag & drop · MP4, MOV, WebM · 250 MB max';
+  $('filehint').textContent=file?`${(file.size/1048576).toFixed(1)} MB selected`:`Drag & drop · MP4, MOV, WebM · ${document.body.dataset.hosted==='true'?25:250} MB max`;
   if(file)$('url').value='';
   importError('');
 }
@@ -43,7 +44,8 @@ $('create-form').addEventListener('submit',async event=>{
   const file=$('video').files[0],url=$('url').value.trim();
   if(!file&&!url){importError('Paste a video link or upload a file to get started.');$('url').focus();return;}
   if(!file && (!$('url').validity.valid || !url.startsWith('https://'))){importError('Use a complete public video link starting with https://.');$('url').focus();return;}
-  if(file && file.size>250*1048576){importError('This video is larger than 250 MB. Choose a smaller file.');return;}
+  const uploadLimit=document.body.dataset.hosted==='true'?25:250;
+  if(file && file.size>uploadLimit*1048576){importError(`This video is larger than ${uploadLimit} MB. Use a video link or choose a smaller file.`);return;}
   const data=new FormData();
   Object.entries(brief()).forEach(([key,value])=>data.append(key,String(value)));
   if(file)data.append('video',file);else data.append('url',url);

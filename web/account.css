@@ -1,0 +1,84 @@
+/* Account settings and persistent support actions. */
+.header-inner{max-width:1320px;gap:18px}
+.header-nav{margin-right:0;flex-shrink:0}
+.header-support{display:flex;align-items:center;justify-content:center;gap:10px;margin-left:auto;flex-shrink:0}
+.header-support .github-link{font-size:12px;padding:8px 10px;min-height:40px;gap:6px;order:initial}
+.header-support .github-link>span{display:inline-flex}
+.header-support .github-star{display:none!important}
+.header-support .coffee-link img{width:132px;height:auto}
+.connection{margin-left:0}
+#settings-dialog{width:680px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:0;border:1px solid #e3dfea;border-radius:20px;color:var(--text);background:#fff;box-shadow:0 24px 90px #1c153638;overflow:auto;overscroll-behavior:contain}
+#settings-dialog::backdrop{background:#211b354f;backdrop-filter:blur(4px)}
+body:has(#settings-dialog[open]){overflow:hidden}
+.settings-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:26px 28px 22px;border-bottom:1px solid var(--border)}
+.settings-header h2{font-family:'Segoe UI',sans-serif;font-size:26px;letter-spacing:-.7px;font-weight:650}
+.settings-header p{font-size:14px;color:var(--muted);margin-top:4px}
+.settings-header .icon-button{width:40px;min-height:40px;background:#f5f3f8;border-radius:10px}
+.account-panel,.settings-system{margin:0;padding:24px 28px;border:0;background:#fff;color:var(--text)}
+.account-panel{border-bottom:1px solid var(--border)}
+.settings-section-heading{display:flex;align-items:center;gap:12px}
+.settings-section-heading>div{min-width:0;flex:1}
+.settings-symbol{width:40px;height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content:center;background:#f0ebfb;color:var(--accent);border-radius:11px}
+.settings-section-heading h3{font-size:15px;font-weight:650;letter-spacing:-.2px}
+.settings-section-heading p{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+.account-badge{font-size:11px;color:#716975;background:#f4f1f6;padding:5px 8px;border-radius:6px;white-space:nowrap}
+[data-state=connected] .account-badge{color:#2f654d;background:#edf7f0}
+[data-state=pending] .account-badge{color:#785e26;background:#fbf4e4}
+.account-identity{margin-top:20px;padding:16px 18px;background:#f8f7fa;border:1px solid #eeebf3;border-radius:12px;overflow-wrap:anywhere}
+.account-identity strong{font-size:15px;font-weight:600}
+.account-identity p{font-size:13px;color:var(--muted);line-height:1.65;margin-top:5px}
+#account-plan{display:inline-block;font-size:11px;font-weight:600;color:#5d478d;margin-top:10px;text-transform:capitalize}
+.account-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}
+.account-actions .primary,.account-actions .secondary,.account-actions .text-button{font-size:13px}
+.settings-note{font-size:12px;color:var(--muted);line-height:1.65;margin-top:16px}
+.account-device{margin-top:18px;padding:18px;border:1px solid #ded5ef;border-radius:12px;background:#f8f5fe}
+.account-device>p{font-size:13px;margin:0 0 12px;line-height:1.6}
+.account-code-row{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.account-code-row code{font:700 25px/1.4 Consolas,monospace;letter-spacing:2px;color:#4c3683;overflow-wrap:anywhere}
+.account-code-row .secondary{margin-left:auto;font-size:12px;white-space:nowrap}
+.account-device .hint{margin:14px 0 0;font-size:12px}
+#account-message{font-size:13px;margin:14px 0 0;padding:12px;border-radius:8px;background:#faf0f1;color:#8e3544;line-height:1.6;overflow-wrap:anywhere}
+.settings-checks{margin:20px 0 0}
+.settings-checks>div{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid #efedf3;font-size:13px}
+.settings-checks>div:last-child{border-bottom:0;padding-bottom:0}
+.settings-checks dt small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.settings-checks dd{margin:0;font-size:12px;color:var(--muted);text-align:right}
+.settings-checks dd[data-ready=true]{color:#317454}
+.settings-checks dd[data-ready=false]{color:#a04b37}
+.settings-footer{display:flex;justify-content:space-between;gap:16px;padding:18px 28px;border-top:1px solid var(--border);background:#faf9fc;color:var(--muted);font-size:11px}
+#auth-help{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#auth-settings{color:var(--accent);white-space:nowrap}
+@media(max-width:1100px){
+  .header-inner{flex-wrap:wrap;gap:12px 18px}
+  .wordmark{margin-right:auto}
+  .header-nav{order:3;flex:1}
+  .header-nav .text-button{flex:1}
+  .header-support{order:4;margin-left:auto}
+  .connection{order:2}
+}
+@media(max-width:600px){
+  .header-inner{padding:12px 16px;gap:10px}
+  .header-nav{width:100%;flex-basis:100%;order:3}
+  .header-nav .text-button{font-size:12px;padding:8px 9px}
+  .header-support{order:4;margin:0;width:100%;gap:12px}
+  .header-support .github-link{font-size:12px;min-height:40px;padding:8px 10px}
+  .header-support .github-link>span{display:inline}
+  .header-support .coffee-link{order:initial;min-height:40px}
+  .header-support .coffee-link img{width:132px}
+  #settings-dialog{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);border-radius:16px}
+  .settings-header{padding:20px}
+  .account-panel,.settings-system{padding:20px}
+  .settings-section-heading{flex-wrap:wrap;gap:10px}
+  #account-panel .settings-section-heading>div{flex-basis:calc(100% - 50px)}
+  .account-badge{margin-left:50px}
+  .settings-section-heading p{font-size:12px}
+  .account-identity{padding:14px}
+  .account-actions{gap:6px}
+  .account-code-row{gap:8px;flex-wrap:wrap}
+  .account-code-row code{font-size:22px}
+  .account-device{padding:14px}
+  .account-device .primary{font-size:12px;width:100%}
+  .settings-footer{padding:16px 20px;flex-wrap:wrap;gap:6px}
+  #auth-help{flex-wrap:wrap}
+}
+@media(max-width:380px){.header-nav .icon{display:none}.header-support{gap:8px}.header-support .github-link{font-size:11px;padding:8px}.header-support .coffee-link img{width:128px}}

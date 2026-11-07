@@ -79,7 +79,7 @@ with sync_playwright() as pw:
             assert abs(canvas['width'] / canvas['height'] - width / height) < .001
             assert abs(canvas['width'] - viewport['width']) < 1
             assert abs(canvas['height'] - viewport['height']) < 1
-            for selector in ['#promo-brand', '#promo-website', '#promo-identities', '.promo-repo', '#source-video', '#result-video']:
+            for selector in ['#promo-website', '#promo-identities', '#source-video', '#result-video']:
                 bounds = page.locator(selector).bounding_box()
                 assert bounds and bounds['width'] > 0 and bounds['height'] > 0, (look, format_name, selector)
                 assert bounds['x'] >= -.5 and bounds['y'] >= -.5, (look, format_name, selector, bounds)

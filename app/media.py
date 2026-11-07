@@ -1,6 +1,7 @@
 import ipaddress
 import json
 import math
+import os
 import socket
 import sys
 from pathlib import Path
@@ -21,6 +22,11 @@ def validate_url(url):
     if p.scheme != 'https' or not p.hostname or p.username or p.password:
         raise ValueError('Use a public HTTPS video link.')
     if p.port not in (None,443): raise ValueError('Only standard HTTPS links are supported.')
+    if os.environ.get('FRAMEFORGE_HOSTED')=='1':
+        # Public workers only fetch fixed video providers/CDNs, never arbitrary user-controlled hosts.
+        providers=('x.com','twitter.com','twimg.com','youtube.com','youtu.be','googlevideo.com','vimeo.com','vimeocdn.com')
+        if not any(p.hostname==h or p.hostname.endswith('.'+h) for h in providers):
+            raise ValueError('Use a public X, YouTube, or Vimeo video link, or upload your video file.')
     try:
         addresses=socket.getaddrinfo(p.hostname,443,type=socket.SOCK_STREAM)
         if not addresses or any(not ipaddress.ip_address(a[4][0]).is_global for a in addresses):
@@ -39,7 +45,11 @@ def download(url, dest, cancel, progress):
         progress('Downloading public video', 4)
         run([sys.executable,'-m','yt_dlp','--ignore-config','--no-playlist','--no-progress',
              '--max-filesize',str(MAX_BYTES),'--socket-timeout','20','--retries','1',
-             '-f','best[height<=1080]/best','-o',str(dest),'--',url],timeout=180,cancel=cancel)
+             '-f','bv*[height<=1080]+ba/b[height<=1080]/b',
+             '--merge-output-format','mkv','-o',str(dest),'--',url],timeout=180,cancel=cancel)
+        # yt-dlp appends the merge container to a fixed output filename.
+        merged=dest.with_name(dest.name+'.mkv')
+        if merged.exists():merged.replace(dest)
     else:
         with httpx.Client(timeout=30, follow_redirects=False, trust_env=False) as client:
             for _ in range(6):
