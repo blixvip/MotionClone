@@ -48,13 +48,31 @@ def clear_region(frame, box, method, color):
     return frame
 
 
+DEJAVU_DIRS=('/usr/share/fonts/truetype/dejavu','/usr/share/fonts/dejavu','/usr/share/fonts/TTF')
+FONT_FALLBACKS={
+    ('sans','regular'):('DejaVuSans.ttf','/System/Library/Fonts/Supplemental/Arial.ttf','/System/Library/Fonts/Helvetica.ttc'),
+    ('sans','bold'):('DejaVuSans-Bold.ttf','/System/Library/Fonts/Supplemental/Arial Bold.ttf','/System/Library/Fonts/Helvetica.ttc'),
+    ('serif','regular'):('DejaVuSerif.ttf','/System/Library/Fonts/Supplemental/Georgia.ttf','/System/Library/Fonts/Supplemental/Times New Roman.ttf'),
+    ('serif','bold'):('DejaVuSerif-Bold.ttf','/System/Library/Fonts/Supplemental/Georgia Bold.ttf','/System/Library/Fonts/Supplemental/Times New Roman Bold.ttf'),
+    ('mono','regular'):('DejaVuSansMono.ttf','/System/Library/Fonts/Supplemental/Courier New.ttf','/System/Library/Fonts/Menlo.ttc'),
+    ('mono','bold'):('DejaVuSansMono-Bold.ttf','/System/Library/Fonts/Supplemental/Courier New Bold.ttf','/System/Library/Fonts/Menlo.ttc'),
+}
+
+
+def _font_paths(family,weight):
+    for name in FONT_FALLBACKS[family,weight]:
+        if name.startswith('/'):yield name
+        else:
+            for folder in DEJAVU_DIRS:yield f'{folder}/{name}'
+
+
 @lru_cache(maxsize=256)
 def font_for(family, weight, size):
     fonts=Path(os.environ.get('WINDIR','C:/Windows'))/'Fonts'
     name={'sans':('arial.ttf','arialbd.ttf'),'serif':('georgia.ttf','georgiab.ttf'),'mono':('consola.ttf','consolab.ttf')}[family][weight=='bold']
     path=fonts/name
     if path.exists():return ImageFont.truetype(str(path),max(1,size))
-    for path in ['/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf','/System/Library/Fonts/Helvetica.ttc']:
+    for path in _font_paths(family,weight):
         if Path(path).exists():return ImageFont.truetype(path,max(1,size))
     return ImageFont.load_default(size=max(1,size))
 
