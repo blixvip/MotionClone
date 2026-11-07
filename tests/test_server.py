@@ -60,3 +60,37 @@ def test_no_arbitrary_local_file_reads():
 def test_invalid_render_schema_rejected_before_job_execution():
     r=client.post('/api/jobs/aaaaaaaaaaaa/render',headers={'X-Frameforge-Token':TOKEN},json={'tracks':[{'id':'x','kind':'script'}]})
     assert r.status_code==422
+
+
+def test_local_job_rejects_non_https_url_before_creating_project_folder(monkeypatch, tmp_path):
+    import app.server as server
+
+    monkeypatch.setattr(server, 'HOSTED', False)
+    monkeypatch.setattr(server, 'DATA', tmp_path)
+    response = client.post(
+        '/api/jobs',
+        headers={'X-Frameforge-Token': TOKEN},
+        data={'url': 'http://example.com/clip.mp4'},
+    )
+
+    assert response.status_code == 422
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_local_job_rejects_overlong_url_before_creating_project_folder(monkeypatch, tmp_path):
+    import app.server as server
+
+    monkeypatch.setattr(server, 'HOSTED', False)
+    monkeypatch.setattr(server, 'DATA', tmp_path)
+    url = 'https://example.com/' + 'a' * (2049 - len('https://example.com/'))
+
+    response = client.post(
+        '/api/jobs',
+        headers={'X-Frameforge-Token': TOKEN},
+        data={'url': url},
+    )
+
+    assert len(url) == 2049
+    assert response.status_code == 422
+    assert response.json()['detail'] == 'That video link is too long.'
+    assert list(tmp_path.iterdir()) == []
