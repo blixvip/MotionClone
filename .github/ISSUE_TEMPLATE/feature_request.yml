@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Ideas are welcome! Want to talk one through first? Drop it in the
-        [Discord](https://discord.gg/wJfHQXfEMM) or open a
+        [Discord](https://discord.gg/grokbot) or open a
         [Discussion](https://github.com/blixvip/MotionClone/discussions).
   - type: textarea
     id: problem
