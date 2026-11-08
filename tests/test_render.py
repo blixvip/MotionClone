@@ -4,9 +4,11 @@ import threading
 from pathlib import Path
 import cv2
 import numpy as np
+import pytest
+from PIL import ImageFont
 from app.media import prepare, probe
 from app.models import Plan, Track, Keyframe, Brief
-from app.render import render
+from app.render import font_for, render
 
 
 def test_real_rebuild_does_not_reuse_reference_pixels_and_verifies_audio(tmp_path):
@@ -41,3 +43,25 @@ def test_portrait_import_preserves_vertical_resolution(tmp_path):
                     '-c:v','libx264','-pix_fmt','yuv420p',str(source)],check=True)
     meta,_=prepare(source,tmp_path,threading.Event(),lambda *a:None)
     assert (meta['width'],meta['height'])==(720,1280)
+
+
+@pytest.mark.parametrize('family,weight,face',[
+    ('sans','regular','DejaVuSans.ttf'),
+    ('sans','bold','DejaVuSans-Bold.ttf'),
+    ('serif','regular','DejaVuSerif.ttf'),
+    ('serif','bold','DejaVuSerif-Bold.ttf'),
+    ('mono','regular','DejaVuSansMono.ttf'),
+    ('mono','bold','DejaVuSansMono-Bold.ttf')])
+def test_font_fallback_keeps_family_and_weight(monkeypatch,tmp_path,family,weight,face):
+    # No Fonts dir under the patched WINDIR, so the Windows lookup misses.
+    monkeypatch.setenv('WINDIR',str(tmp_path))
+    monkeypatch.setattr(Path,'exists',lambda self:self.name==face)
+    chosen=[]
+    monkeypatch.setattr(ImageFont,'truetype',lambda *a,**k:chosen.append(a[0]) or (family,weight))
+    monkeypatch.setattr(ImageFont,'load_default',lambda *a,**k:'default')
+    font_for.cache_clear()
+    try:
+        assert font_for(family,weight,32)==(family,weight)
+        assert Path(chosen[0]).name==face
+    finally:
+        font_for.cache_clear()
