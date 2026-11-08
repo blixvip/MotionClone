@@ -43,6 +43,10 @@
 </p>
 
 <p align="center">
+  🛠 <strong>Built in the open</strong> — 6 contributors · 22 good first issues · we review PRs within 24h → <a href="https://github.com/blixvip/MotionClone/issues/16">start here</a>
+</p>
+
+<p align="center">
   <a href="#why-motionclone">Why</a> ·
   <a href="#a-reference-is-the-starting-point">How it works</a> ·
   <a href="#run-locally">Run locally</a> ·
@@ -175,6 +179,10 @@ For development, run `.venv\Scripts\python.exe -m pytest -q` after setup. See th
 ## Contributors
 
 Thank you to everyone who has helped build MotionClone. New here? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick one of the [good first issues](https://github.com/blixvip/MotionClone/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/blixvip/MotionClone?quickstart=1)
+
+The Codespace (or any dev container) comes with Python 3.12, Node.js 22, FFmpeg and every dependency installed, so `python -m pytest -q` works straight away. See [Your first PR in 10 minutes](CONTRIBUTING.md#your-first-pr-in-10-minutes).
 
 <a href="https://github.com/blixvip/MotionClone/graphs/contributors"><img src="https://contrib.rocks/image?repo=blixvip/MotionClone" alt="Contributors" /></a>
 

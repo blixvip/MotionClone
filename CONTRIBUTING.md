@@ -4,6 +4,21 @@
 
 Thanks for helping! Questions and ideas are welcome in the **[Discord](https://discord.gg/grokbot)**, and bugs go in [GitHub issues](https://github.com/blixvip/MotionClone/issues/new/choose).
 
+## Your first PR in 10 minutes
+
+1. **Get the code.** Click [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/blixvip/MotionClone?quickstart=1) and dependencies install for you. Or fork and run `git clone https://github.com/<you>/MotionClone.git`.
+2. **Install.** Codespace: already done. Locally on macOS/Linux:
+   ```sh
+   python3 -m venv .venv && .venv/bin/pip install -r requirements.lock.txt
+   npm ci --prefix hyperframes --no-fund --no-audit
+   ```
+   On Windows, run `.\start.ps1` once. You also need `ffmpeg` and `ffprobe` on your `PATH`.
+3. **Run the tests.** `python -m pytest -q` (or `.venv/bin/python -m pytest -q`). They take about a minute, and all of them should pass before you change anything.
+4. **Pick an issue.** Choose a [good first issue](https://github.com/blixvip/MotionClone/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and comment to claim it. Each one names the files to touch.
+5. **Open the PR.** Branch, make the change, rerun the tests and push. Then open a pull request that says `Fixes #<issue>`.
+
+You don't need a Codex login or Chrome to run the tests. You only need them to run the full app.
+
 ## Finding something to work on
 
 - [Good first issues](https://github.com/blixvip/MotionClone/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are small and list the files to touch.
