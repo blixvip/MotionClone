@@ -230,3 +230,64 @@ def test_interrupted_new_request_cannot_resume_response_from_old_instructions(tm
     monkeypatch.setattr(scenes,'request_scene',lambda *a,**kw:project('New copy'))
     result=scenes.build(*args,brief=Brief(instructions='New copy'))
     assert result.title=='New copy'
+
+
+def _audio_meta(tmp_path):
+    # A real source.mp4 is needed because write_project ffmpeg-extracts audio
+    # from it; a file named .mp4 is enough for the unlink path but not for the
+    # keep-audio path.
+    (tmp_path/'temporal.json').write_text(json.dumps(dict(fps=10,decoded_frames=20,sample_frames=[])))
+    (tmp_path/'source.mp4').write_bytes(b'known reference')
+    return dict(fps=10,width=320,height=180,audio=True,duration=2.0)
+
+
+def test_rebuild_audio_setting_reaches_every_write_project_call(tmp_path,monkeypatch):
+    """A user who unchecks "Keep original audio" must get a project with none.
+
+    The rebuild project is written before export, so reconstruction.py's
+    export-time strip hid this from the rendered MP4. Opening the saved folder
+    and running `npm run preview` played the audio anyway.
+    """
+    from app.models import Brief
+    written=[]
+    monkeypatch.setattr(scenes,'reference_sheets',lambda *a:[])
+    monkeypatch.setattr(scenes,'request_scene',lambda *a,**kw:project())
+    monkeypatch.setattr(scenes,'preview',lambda *a,**kw:[])
+    monkeypatch.setattr(scenes,'write_project',
+        lambda folder,meta,value,**kw:written.append(kw.get('keep_audio')))
+    scenes.build(tmp_path,_audio_meta(tmp_path),threading.Event(),lambda *a:None,
+                 brief=Brief(mode='rebuild',keep_audio=False))
+    assert written, 'build() must write the project at least once'
+    assert all(call is False for call in written), f'every call must forward keep_audio=False, saw {written}'
+
+
+def test_rebuild_without_a_brief_defaults_to_keeping_audio(tmp_path,monkeypatch):
+    written=[]
+    monkeypatch.setattr(scenes,'reference_sheets',lambda *a:[])
+    monkeypatch.setattr(scenes,'request_scene',lambda *a,**kw:project())
+    monkeypatch.setattr(scenes,'preview',lambda *a,**kw:[])
+    monkeypatch.setattr(scenes,'write_project',
+        lambda folder,meta,value,**kw:written.append(kw.get('keep_audio')))
+    scenes.build(tmp_path,_audio_meta(tmp_path),threading.Event(),lambda *a:None)
+    assert written and all(call is True for call in written)
+
+
+def test_write_project_removes_a_stale_audio_copy_when_audio_turned_off(tmp_path,monkeypatch):
+    meta=_audio_meta(tmp_path)
+    from app.rebuild_author import write_project
+    import app.process
+    import app.hyperframes
+    # Stand in for the ffmpeg extraction: create the file that run() would create.
+    # write_project imports .process.run and .hyperframes.frame_info inside the
+    # function, so the patch targets are the module attributes.
+    def fake_run(args,cancel=None):
+        (tmp_path/'rebuild/assets').mkdir(parents=True,exist_ok=True)
+        (tmp_path/'rebuild/assets/audio.m4a').write_bytes(b'fake aac')
+    monkeypatch.setattr(app.process,'run',fake_run)
+    monkeypatch.setattr(app.hyperframes,'frame_info',lambda path,cancel=None:(20,'10'))
+    write_project(tmp_path,meta,project(),keep_audio=True)
+    assert (tmp_path/'rebuild/assets/audio.m4a').exists()
+    assert '<audio' in (tmp_path/'rebuild/index.html').read_text(encoding='utf-8')
+    write_project(tmp_path,meta,project(),keep_audio=False)
+    assert not (tmp_path/'rebuild/assets/audio.m4a').exists(), 'a stale soundtrack must not survive'
+    assert '<audio' not in (tmp_path/'rebuild/index.html').read_text(encoding='utf-8')

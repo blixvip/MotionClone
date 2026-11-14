@@ -170,11 +170,19 @@ def write_project(folder,meta,value,*,keep_audio=True,cancel=None):
     (project/'project.js').write_text('window.project='+json.dumps(data,separators=(',',':')).replace('<','\\u003c')+';',encoding='utf-8')
     (project/'renderer.js').write_text(RENDERER,encoding='utf-8')
     audio=''
+    audio_path=project/'assets/audio.m4a'
     if meta['audio'] and keep_audio:
-        audio_path=project/'assets/audio.m4a'
+        # The cached copy belongs to the same source.mp4, so reuse it; refresh
+        # it only when the source is newer.
         if not audio_path.exists() or audio_path.stat().st_mtime<(folder/'source.mp4').stat().st_mtime:
             run(['ffmpeg','-y','-v','error','-i',str(folder/'source.mp4'),'-vn','-c:a','copy',str(audio_path)],cancel=cancel)
         audio=f'<audio id="audio" src="assets/audio.m4a" data-start="0" data-duration="{meta["duration"]}" data-track-index="99"></audio>'
+    else:
+        # A project folder can be rewritten after the user turns "Keep original
+        # audio" off. The cached copy is then stale, and leaving it behind both
+        # keeps a redundant soundtrack on disk and lets a direct `npm run
+        # preview` play audio the user opted out of.
+        audio_path.unlink(missing_ok=True)
     (project/'index.html').write_text(f'''<!doctype html><html><head><meta charset="utf-8"><title>Editable reconstruction</title>
 <style>@font-face{{font-family:Agbalumo;src:url('assets/Agbalumo-Regular.ttf')}}html,body{{margin:0;overflow:hidden;background:{value.background}}}#root{{position:relative;width:{meta['width']}px;height:{meta['height']}px;overflow:hidden}}.layer{{position:absolute;box-sizing:border-box;white-space:pre-wrap;transform-origin:center}}</style>
 <script src="vendor/gsap.min.js"></script><script src="project.js"></script><script src="renderer.js"></script></head><body>
