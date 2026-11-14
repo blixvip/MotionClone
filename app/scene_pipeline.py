@@ -165,6 +165,12 @@ def build(folder,meta,cancel,progress,*,brief=None):
     scan=json.loads((folder/'temporal.json').read_text(encoding='utf-8'));ranges=intervals(scan)
     meta={**meta,'fps':scan['fps'],'duration':scan['decoded_frames']/scan['fps']}
     instructions=brief.instructions.strip() if brief else ''
+    # The rebuild project is written BEFORE reconstruction.py patches it for
+    # export. Every write_project call must already honour the user's audio
+    # choice, otherwise the saved project keeps assets/audio.m4a and an
+    # <audio> tag that the user opted out of; opening that folder directly and
+    # running `npm run preview`/`npm run render` plays the audio back.
+    keep_audio=brief.keep_audio if brief is not None else True
     settings=hashlib.sha256(json.dumps({'instructions':instructions,'sampling':scan.get('budget',192)},sort_keys=True).encode()).hexdigest()
     signature=f'{VERSION}:{digest(folder/"source.mp4")}:{settings}';scenes=[None]*len(ranges);stop=threading.Event()
     class Stop:
@@ -219,7 +225,7 @@ def build(folder,meta,cancel,progress,*,brief=None):
             for future in pending:future.cancel()
             if time.monotonic()>=deadline and not cancel.is_set():raise TimeoutError('Analysis time limit reached. Retry resumes completed scenes.')
             raise
-    value=merge(scenes,ranges,meta);write_project(folder,meta,value,cancel=cancel)
+    value=merge(scenes,ranges,meta);write_project(folder,meta,value,keep_audio=keep_audio,cancel=cancel)
     progress('Checking scene previews against the reference',52)
     before=preview(folder,ranges,meta,cancel);revisions=[];final_previews={item['scene']:item for item in before}
     # A bounded correction pass. Keep the earlier version whenever a revision regresses.
@@ -233,7 +239,7 @@ def build(folder,meta,cancel,progress,*,brief=None):
             patch=request_scene(part,meta,images,flag,tag='revision',response_model=SceneRevision,timeout=min(120,deadline-time.monotonic()),
                 context='VISUAL CORRECTION. The first '+str(len(item.get('reference_images',[])))+' images are original REFERENCE frames; the remaining images are current REBUILD frames at the same ordered times: '+str([n/meta['fps'] for n in item.get('frames',[])])+'. Each image is the ENTIRE viewport, not a contact sheet. Return a SMALL PATCH using the patch schema: updates contain the existing id and ONLY changed fields. Do not repeat unchanged text, styles or frames. Fix at most 6 important differences in content, copy, layout, scale, typography or timing. If no fix is justified, return empty lists. Times remain ABSOLUTE. Do not add source media. CURRENT SCENE: '+old.model_dump_json())
             fixed=apply_revision(old,patch)
-            scenes[i]=fixed;candidate=merge(scenes,ranges,meta);write_project(folder,meta,candidate,cancel=cancel)
+            scenes[i]=fixed;candidate=merge(scenes,ranges,meta);write_project(folder,meta,candidate,keep_audio=keep_audio,cancel=cancel)
             after=preview(folder,ranges,meta,cancel,tag='revision',only={i})[0]
             accepted=after['mean']>item['mean']+.002 and after['minimum']>=item['minimum']-.03
             revisions.append(dict(scene=i,accepted=accepted,before=item['mean'],after=after['mean']))
@@ -247,7 +253,7 @@ def build(folder,meta,cancel,progress,*,brief=None):
             revisions.append(dict(scene=i,accepted=False,reason='Revision time limit; first version retained.'));break
         except (ValueError,RuntimeError,TimeoutError) as exc:
             scenes[i]=old;revisions.append(dict(scene=i,accepted=False,reason=str(exc)[:180]))
-        finally:write_project(folder,meta,merge(scenes,ranges,meta),cancel=cancel)
+        finally:write_project(folder,meta,merge(scenes,ranges,meta),keep_audio=keep_audio,cancel=cancel)
     value=merge(scenes,ranges,meta)
     report=dict(version=VERSION,scenes=len(scenes),resumed_scenes=resumed,decoded_frames=scan['decoded_frames'],
         elapsed_seconds=round(time.monotonic()-started,2),previews=list(final_previews.values()),

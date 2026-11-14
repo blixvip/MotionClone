@@ -147,6 +147,13 @@ def export_project(folder):
     dest=folder/'hyperframes-rebuilt.zip'
     keep_audio=True
     if (folder/'brief.json').exists():keep_audio=json.loads((folder/'brief.json').read_text(encoding='utf-8')).get('keep_audio',True)
+    # scene_pipeline.build now forwards keep_audio into write_project, so a
+    # project written today already has no <audio> tag and no assets/audio.m4a
+    # when the user opted out. This strip stays as a compatibility pass for
+    # folders reconstructed by an older version, whose rebuild/index.html was
+    # always written with audio. Do not remove it on the strength of the
+    # write-side fix alone; it is also the last guard if a partial or resumed
+    # rebuild leaves an older project on disk.
     with zipfile.ZipFile(dest,'w',zipfile.ZIP_DEFLATED) as archive:
         for name in PROJECT_FILES:
             if (project/name).exists():
